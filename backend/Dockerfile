@@ -1,15 +1,16 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
 RUN apk add --no-cache build-base
 
 COPY go.mod go.sum ./
+RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o server ./cmd/server
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CGO_CFLAGS="-D_LARGEFILE64_SOURCE" go build -o server ./cmd/server
 
 FROM alpine:3.20
 

@@ -118,7 +118,7 @@
     }
 }
 
-/* 高DPI屏幕优化 */
+/* 高 DPI 屏幕优化 */
 @media (-webkit-min-device-pixel-ratio: 2),
 (min-resolution: 192dpi) {
     .review-card-image {

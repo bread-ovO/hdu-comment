@@ -121,4 +121,23 @@ GET /api/v1/reviews?page=1&page_size=12&query=鸡排&sort=rating&order=desc
 3. **运营工具**：支持后台批量审核、数据导出或看板统计。
 4. **通知体系**：结合邮件/企业微信推送审核结果。
 
+## API 文档
+
+项目已集成 Swagger UI，启动服务后可通过浏览器访问：
+
+```
+http://localhost:8080/swagger/index.html
+```
+
+### 使用说明
+- 所有 API 端点都已文档化，包含请求参数、响应格式和示例
+- 支持在线测试 API 功能
+- 文档自动生成，与代码保持同步
+
+### 开发指南
+如需更新 API 文档，请在 `backend` 目录执行：
+```bash
+swag init
+```
+
 欢迎继续完善并部署到生产环境！

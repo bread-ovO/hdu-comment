@@ -22,7 +22,18 @@ func NewReviewHandler(reviews *services.ReviewService) *ReviewHandler {
 	return &ReviewHandler{reviews: reviews}
 }
 
-// ListPublic returns approved reviews for public consumption.
+// @Summary      公开点评列表
+// @Description  获取已审核通过的点评列表，支持分页、搜索和排序。
+// @Tags         点评
+// @Produce      json
+// @Param        page      query int    false "页码" default(1)
+// @Param        page_size query int    false "每页数量" default(10)
+// @Param        query     query string false "搜索关键词"
+// @Param        sort      query string false "排序字段 (created_at, rating)" enums(created_at, rating) default(created_at)
+// @Param        order     query string false "排序顺序 (asc, desc)" enums(asc, desc) default(desc)
+// @Success      200 {object} services.ReviewListResult
+// @Failure      500 {object} object{error=string} "服务器内部错误"
+// @Router       /reviews [get]
 func (h *ReviewHandler) ListPublic(c *gin.Context) {
 	filters := parseListFilters(c)
 	result, err := h.reviews.ListPublic(filters)
@@ -33,7 +44,16 @@ func (h *ReviewHandler) ListPublic(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// Submit allows authenticated users to submit a new review.
+// @Summary      提交新点评
+// @Description  已认证用户提交一条新的点评，需要等待管理员审核。
+// @Tags         点评
+// @Accept       json
+// @Produce      json
+// @Param        body body object{title=string,address=string,description=string,rating=number} true "点评内容"
+// @Success      201 {object} models.Review "创建成功"
+// @Failure      400 {object} object{error=string} "请求参数错误"
+// @Security     ApiKeyAuth
+// @Router       /reviews [post]
 func (h *ReviewHandler) Submit(c *gin.Context) {
 	userID := c.MustGet("user_id").(uuid.UUID)
 	var req struct {
@@ -62,7 +82,16 @@ func (h *ReviewHandler) Submit(c *gin.Context) {
 	c.JSON(http.StatusCreated, review)
 }
 
-// Detail returns a single review by id.
+// @Summary      获取点评详情
+// @Description  根据 ID 获取单个点评的详细信息。未审核的点评仅作者和管理员可见。
+// @Tags         点评
+// @Produce      json
+// @Param        id path string true "点评 ID"
+// @Success      200 {object} models.Review
+// @Failure      400 {object} object{error=string} "无效的点评 ID"
+// @Failure      403 {object} object{error=string} "无权访问"
+// @Failure      404 {object} object{error=string} "点评不存在"
+// @Router       /reviews/{id} [get]
 func (h *ReviewHandler) Detail(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -95,7 +124,19 @@ func (h *ReviewHandler) Detail(c *gin.Context) {
 	c.JSON(http.StatusOK, review)
 }
 
-// MyReviews returns reviews of the authenticated user.
+// @Summary      我的点评列表
+// @Description  获取当前认证用户提交的所有点评列表，支持分页、搜索和排序。
+// @Tags         点评
+// @Produce      json
+// @Param        page      query int    false "页码" default(1)
+// @Param        page_size query int    false "每页数量" default(10)
+// @Param        query     query string false "搜索关键词"
+// @Param        sort      query string false "排序字段 (created_at, rating)" enums(created_at, rating) default(created_at)
+// @Param        order     query string false "排序顺序 (asc, desc)" enums(asc, desc) default(desc)
+// @Success      200 {object} services.ReviewListResult
+// @Failure      500 {object} object{error=string} "服务器内部错误"
+// @Security     ApiKeyAuth
+// @Router       /reviews/me [get]
 func (h *ReviewHandler) MyReviews(c *gin.Context) {
 	userID := c.MustGet("user_id").(uuid.UUID)
 	filters := parseListFilters(c)
@@ -107,7 +148,20 @@ func (h *ReviewHandler) MyReviews(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// UploadImage handles multipart uploads for review images.
+// @Summary      上传点评图片
+// @Description  为指定的点评上传一张图片。用户只能为自己的点评上传。
+// @Tags         点评
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        id   path      string true "点评 ID"
+// @Param        file formData  file   true "图片文件"
+// @Success      201  {object}  models.ReviewImage "上传成功"
+// @Failure      400  {object}  object{error=string} "请求错误"
+// @Failure      403  {object}  object{error=string} "无权操作"
+// @Failure      404  {object}  object{error=string} "点评不存在"
+// @Failure      500  {object}  object{error=string} "服务器内部错误"
+// @Security     ApiKeyAuth
+// @Router       /reviews/{id}/images [post]
 func (h *ReviewHandler) UploadImage(c *gin.Context) {
 	reviewID, err := uuid.Parse(c.Param("id"))
 	if err != nil {

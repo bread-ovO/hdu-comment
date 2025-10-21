@@ -1,0 +1,149 @@
+.not-found-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 80px);
+    /* Adjust height based on your header height */
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.not-found-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.not-found-container p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.not-found-container canvas {
+    border: 1px solid #ccc;
+    background-color: #f7f7f7;
+}
+
+.dino-game-container {
+    width: 600px;
+    /* Match canvas width */
+    margin: 0 auto;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .not-found-container {
+        height: calc(100vh - 60px);
+        /* 调整高度适应小屏幕 */
+        padding: 20px;
+    }
+
+    .not-found-container h1 {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .not-found-container p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 0 10px;
+    }
+
+    .dino-game-container {
+        width: 100%;
+        max-width: 400px;
+        /* 限制最大宽度 */
+        margin: 0 auto;
+    }
+
+    .not-found-container canvas {
+        max-width: 100%;
+        height: auto;
+        /* 保持宽高比 */
+    }
+}
+
+@media (max-width: 480px) {
+    .not-found-container {
+        height: calc(100vh - 50px);
+        padding: 15px;
+    }
+
+    .not-found-container h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .not-found-container p {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .dino-game-container {
+        max-width: 320px;
+        /* 更小屏幕的限制 */
+    }
+}
+
+/* 横屏模式优化 */
+@media (orientation: landscape) and (max-width: 768px) {
+    .not-found-container {
+        height: calc(100vh - 40px);
+        /* 横屏时减少顶部空间 */
+    }
+
+    .not-found-container h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .not-found-container p {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    .not-found-container canvas {
+        /* 确保触摸区域足够大 */
+        min-height: 150px;
+    }
+}
+
+/* 游戏提示样式 */
+.game-hint {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+/* 触摸交互优化 */
+.dino-game-container {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.dino-game-container:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* 移动端触摸反馈 */
+@media (hover: none) and (pointer: coarse) {
+    .game-hint {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dino-game-container {
+        padding: 10px;
+        /* 增加触摸区域 */
+        margin: -10px auto;
+        /* 负边距保持视觉大小 */
+    }
+}
