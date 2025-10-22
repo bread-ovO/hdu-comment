@@ -1,4 +1,3 @@
-import type { AxiosError } from 'axios';
 import {
   createContext,
   useCallback,
@@ -12,7 +11,6 @@ import {
 import {
   login as apiLogin,
   register as apiRegister,
-  fetchMe,
   refreshTokens,
   logout as apiLogout,
   setAuthTokens,
@@ -37,6 +35,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const TOKEN_KEY = 'hdu-food-review-access-token';
 const REFRESH_KEY = 'hdu-food-review-refresh-token';
+const USER_KEY = 'hdu-food-review-user';
 
 const readLocalToken = (key: string) => {
   try {
@@ -59,8 +58,31 @@ const writeLocalToken = (key: string, value: string | null) => {
   }
 };
 
+const readLocalUser = (): User | null => {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as User;
+  } catch (err) {
+    console.warn('unable to read cached user', err);
+    return null;
+  }
+};
+
+const writeLocalUser = (value: User | null) => {
+  try {
+    if (value) {
+      localStorage.setItem(USER_KEY, JSON.stringify(value));
+    } else {
+      localStorage.removeItem(USER_KEY);
+    }
+  } catch (err) {
+    console.warn('unable to cache user', err);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => readLocalUser());
   const [token, setToken] = useState<string | null>(() => readLocalToken(TOKEN_KEY));
   const [refreshToken, setRefreshToken] = useState<string | null>(() => readLocalToken(REFRESH_KEY));
   const [loading, setLoading] = useState<boolean>(true);
@@ -77,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearAuthTokens();
     writeLocalToken(TOKEN_KEY, null);
     writeLocalToken(REFRESH_KEY, null);
+    writeLocalUser(null);
   }, []);
 
   const persist = useCallback((auth: AuthResponse) => {
@@ -86,6 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAuthTokens(auth.access_token, auth.refresh_token);
     writeLocalToken(TOKEN_KEY, auth.access_token);
     writeLocalToken(REFRESH_KEY, auth.refresh_token);
+    writeLocalUser(auth.user);
   }, []);
 
   const refreshAccessToken = useCallback(async (): Promise<AuthResponse | null> => {
@@ -116,35 +140,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      try {
-        const profile = await fetchMe();
-        setUser(profile);
-      } catch (err: unknown) {
-        const status = (err as AxiosError | undefined)?.response?.status;
-        if (status === 401) {
-          const refreshed = await refreshAccessToken();
-          if (refreshed) {
-            try {
-              const profile = await fetchMe();
-              setUser(profile);
-            } catch (innerErr) {
-              console.warn('failed to load profile after refresh', innerErr);
-              clearState();
-            }
-          } else {
-            clearState();
-          }
-        } else {
-          console.warn('failed to bootstrap auth', err);
-          clearState();
-        }
-      } finally {
+      if (user) {
         setLoading(false);
+        return;
       }
+
+      const refreshed = await refreshAccessToken();
+      if (!refreshed) {
+        clearState();
+      }
+      setLoading(false);
     };
 
     bootstrap();
-  }, [token, refreshAccessToken, clearState]);
+  }, [token, user, refreshAccessToken, clearState]);
 
   const handleLogin = useCallback(async (email: string, password: string) => {
     const auth = await apiLogin(email, password);
@@ -173,10 +182,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [clearState]);
 
   const refreshProfile = useCallback(async () => {
-    if (!token) return;
-    const profile = await fetchMe();
-    setUser(profile);
-  }, [token]);
+    const updated = await refreshAccessToken();
+    if (updated) {
+      setUser(updated.user);
+      writeLocalUser(updated.user);
+    }
+  }, [refreshAccessToken]);
 
   const value = useMemo<AuthContextValue>(() => ({
     user,
