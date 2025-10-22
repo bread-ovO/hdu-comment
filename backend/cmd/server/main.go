@@ -17,6 +17,24 @@ import (
 	"github.com/hdu-dp/backend/internal/storage"
 )
 
+// @title           杭电点评 API
+// @version         1.0
+// @description     这是一个简单的校园点评网站的后端 API 文档。
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apiKey  ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	cfg, err := config.Load()
 	if err != nil {

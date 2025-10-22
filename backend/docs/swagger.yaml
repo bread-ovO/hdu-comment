@@ -1,0 +1,776 @@
+basePath: /api/v1
+definitions:
+  models.Review:
+    properties:
+      address:
+        type: string
+      author:
+        $ref: '#/definitions/models.User'
+      author_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      images:
+        items:
+          $ref: '#/definitions/models.ReviewImage'
+        type: array
+      rating:
+        type: number
+      rejection_reason:
+        type: string
+      status:
+        $ref: '#/definitions/models.ReviewStatus'
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.ReviewImage:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      review_id:
+        type: string
+      storage_key:
+        type: string
+      url:
+        type: string
+    type: object
+  models.ReviewStatus:
+    enum:
+    - pending
+    - approved
+    - rejected
+    type: string
+    x-enum-varnames:
+    - ReviewStatusPending
+    - ReviewStatusApproved
+    - ReviewStatusRejected
+  models.User:
+    properties:
+      created_at:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  services.Pagination:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  services.ReviewListResult:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Review'
+        type: array
+      pagination:
+        $ref: '#/definitions/services.Pagination'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: 这是一个简单的校园点评网站的后端 API 文档。
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: 杭电点评 API
+  version: "1.0"
+paths:
+  /admin/reviews/{id}:
+    delete:
+      description: 永久删除指定 ID 的点评及其关联的图片。
+      parameters:
+      - description: 点评 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: 删除成功
+        "400":
+          description: 无效的点评 ID
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: 点评不存在
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 删除点评
+      tags:
+      - 管理
+  /admin/reviews/{id}/approve:
+    put:
+      description: 将指定 ID 的点评状态标记为“已批准”。
+      parameters:
+      - description: 点评 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 批准成功
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: 无效的点评 ID 或状态错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: 点评不存在
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 批准点评
+      tags:
+      - 管理
+  /admin/reviews/{id}/reject:
+    put:
+      consumes:
+      - application/json
+      description: 将指定 ID 的点评状态标记为“已拒绝”，并记录原因。
+      parameters:
+      - description: 点评 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 拒绝原因
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            reason:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 拒绝成功
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: 无效的点评 ID 或请求参数错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: 点评不存在
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 拒绝点评
+      tags:
+      - 管理
+  /admin/reviews/pending:
+    get:
+      description: 获取等待管理员审核的点评列表，支持分页、搜索和排序。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜索关键词
+        in: query
+        name: query
+        type: string
+      - default: created_at
+        description: 排序字段 (created_at, rating)
+        enum:
+        - created_at
+        - rating
+        in: query
+        name: sort
+        type: string
+      - default: desc
+        description: 排序顺序 (asc, desc)
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.ReviewListResult'
+        "500":
+          description: 服务器内部错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 待审核点评列表
+      tags:
+      - 管理
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 接收用户邮箱和密码进行登录，成功后返回认证信息。
+      parameters:
+      - description: 登录信息
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            properties:
+              access_token:
+                type: string
+              refresh_token:
+                type: string
+              user:
+                properties:
+                  created_at:
+                    type: string
+                  display_name:
+                    type: string
+                  email:
+                    type: string
+                  id:
+                    type: integer
+                  role:
+                    type: string
+                type: object
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: 邮箱或密码错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: 用户登录
+      tags:
+      - 认证
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 接收刷新令牌并使其失效。
+      parameters:
+      - description: 刷新令牌
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            refresh_token:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: 登出成功
+        "400":
+          description: 请求参数错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: 无效的刷新令牌
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: 用户登出
+      tags:
+      - 认证
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 使用有效的刷新令牌获取新的访问令牌和刷新令牌。
+      parameters:
+      - description: 刷新令牌
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            refresh_token:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 刷新成功
+          schema:
+            properties:
+              access_token:
+                type: string
+              refresh_token:
+                type: string
+              user:
+                properties:
+                  created_at:
+                    type: string
+                  display_name:
+                    type: string
+                  email:
+                    type: string
+                  id:
+                    type: integer
+                  role:
+                    type: string
+                type: object
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: 无效的刷新令牌
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: 刷新令牌
+      tags:
+      - 认证
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 接收用户邮箱、密码和昵称进行注册，成功后返回认证信息。
+      parameters:
+      - description: 注册信息
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            display_name:
+              type: string
+            email:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 注册成功
+          schema:
+            properties:
+              access_token:
+                type: string
+              refresh_token:
+                type: string
+              user:
+                properties:
+                  created_at:
+                    type: string
+                  display_name:
+                    type: string
+                  email:
+                    type: string
+                  id:
+                    type: integer
+                  role:
+                    type: string
+                type: object
+            type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "409":
+          description: 邮箱已被占用
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: 用户注册
+      tags:
+      - 认证
+  /reviews:
+    get:
+      description: 获取已审核通过的点评列表，支持分页、搜索和排序。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜索关键词
+        in: query
+        name: query
+        type: string
+      - default: created_at
+        description: 排序字段 (created_at, rating)
+        enum:
+        - created_at
+        - rating
+        in: query
+        name: sort
+        type: string
+      - default: desc
+        description: 排序顺序 (asc, desc)
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.ReviewListResult'
+        "500":
+          description: 服务器内部错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: 公开点评列表
+      tags:
+      - 点评
+    post:
+      consumes:
+      - application/json
+      description: 已认证用户提交一条新的点评，需要等待管理员审核。
+      parameters:
+      - description: 点评内容
+        in: body
+        name: body
+        required: true
+        schema:
+          properties:
+            address:
+              type: string
+            description:
+              type: string
+            rating:
+              type: number
+            title:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 创建成功
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: 请求参数错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 提交新点评
+      tags:
+      - 点评
+  /reviews/{id}:
+    get:
+      description: 根据 ID 获取单个点评的详细信息。未审核的点评仅作者和管理员可见。
+      parameters:
+      - description: 点评 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Review'
+        "400":
+          description: 无效的点评 ID
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: 无权访问
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: 点评不存在
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: 获取点评详情
+      tags:
+      - 点评
+  /reviews/{id}/images:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 为指定的点评上传一张图片。用户只能为自己的点评上传。
+      parameters:
+      - description: 点评 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 图片文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 上传成功
+          schema:
+            $ref: '#/definitions/models.ReviewImage'
+        "400":
+          description: 请求错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: 无权操作
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: 点评不存在
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 上传点评图片
+      tags:
+      - 点评
+  /reviews/me:
+    get:
+      description: 获取当前认证用户提交的所有点评列表，支持分页、搜索和排序。
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: page_size
+        type: integer
+      - description: 搜索关键词
+        in: query
+        name: query
+        type: string
+      - default: created_at
+        description: 排序字段 (created_at, rating)
+        enum:
+        - created_at
+        - rating
+        in: query
+        name: sort
+        type: string
+      - default: desc
+        description: 排序顺序 (asc, desc)
+        enum:
+        - asc
+        - desc
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.ReviewListResult'
+        "500":
+          description: 服务器内部错误
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 我的点评列表
+      tags:
+      - 点评
+  /users/me:
+    get:
+      description: 获取当前已认证用户的详细信息。
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户信息
+          schema:
+            properties:
+              created_at:
+                type: string
+              display_name:
+                type: string
+              email:
+                type: string
+              id:
+                type: integer
+              role:
+                type: string
+            type: object
+        "401":
+          description: 未认证
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: 用户不存在
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - 用户
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
