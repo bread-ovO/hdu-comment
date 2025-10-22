@@ -1,0 +1,20 @@
+diff --git a/backend/internal/middleware/auth.go b/backend/internal/middleware/auth.go
+index 1234567..abcdefg 100644
+--- a/backend/internal/middleware/auth.go
++++ b/backend/internal/middleware/auth.go
+@@ -100,6 +100,8 @@ func (m *AuthMiddleware) RequireRoles(roles ...string) gin.HandlerFunc {
+ 	return func(c *gin.Context) {
+ 		role, ok := c.Get("role")
+ 		if !ok {
++			// 添加调试日志
++			fmt.Printf("DEBUG: No role found in context for user %v\n", c.Get("user_id"))
+ 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "missing role"})
+ 			return
+ 		}
+@@ -107,6 +109,8 @@ func (m *AuthMiddleware) RequireRoles(roles ...string) gin.HandlerFunc {
+ 		if _, ok := allowed[roleStr]; !ok {
++			// 添加调试日志
++			fmt.Printf("DEBUG: Role mismatch - user role: %s, required roles: %v\n", roleStr, roles)
+ 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("insufficient privileges: got %s, want one of %v", roleStr, roles)})
+ 			return
+ 		}
