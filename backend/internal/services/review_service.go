@@ -214,10 +214,16 @@ func (s *ReviewService) DeleteReview(ctx context.Context, review *models.Review)
 		return errors.New("review is required")
 	}
 
+	// 重新获取包含图片的完整评论数据
+	fullReview, err := s.reviews.FindByID(review.ID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch review with images: %w", err)
+	}
+
 	var keys []string
-	if len(review.Images) > 0 {
-		keys = make([]string, 0, len(review.Images))
-		for _, image := range review.Images {
+	if len(fullReview.Images) > 0 {
+		keys = make([]string, 0, len(fullReview.Images))
+		for _, image := range fullReview.Images {
 			if image.StorageKey != "" {
 				keys = append(keys, image.StorageKey)
 			}
@@ -228,10 +234,9 @@ func (s *ReviewService) DeleteReview(ctx context.Context, review *models.Review)
 		return err
 	}
 
+	// 清理存储中的图片文件，但忽略错误以避免删除失败
 	for _, key := range keys {
-		if err := s.storage.Delete(ctx, key); err != nil {
-			return err
-		}
+		_ = s.storage.Delete(ctx, key)
 	}
 
 	return nil

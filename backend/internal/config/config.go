@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -101,8 +102,8 @@ func Load() (*Config, error) {
 	cfg.Storage.S3.UseSSL = v.GetBool("STORAGE_S3_USE_SSL")
 	cfg.Storage.S3.BaseURL = v.GetString("STORAGE_S3_BASE_URL")
 
-	cfg.Admin.Email = v.GetString("ADMIN_EMAIL")
-	cfg.Admin.Password = v.GetString("ADMIN_PASSWORD")
+	cfg.Admin.Email = strings.TrimSpace(strings.ToLower(v.GetString("ADMIN_EMAIL")))
+	cfg.Admin.Password = strings.TrimSpace(v.GetString("ADMIN_PASSWORD"))
 
 	if cfg.Auth.JWTSecret == "" {
 		return nil, fmt.Errorf("missing auth jwt secret: set APP_AUTH_JWT_SECRET")

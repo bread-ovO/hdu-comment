@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -86,8 +87,9 @@ func (m *AuthMiddleware) RequireRoles(roles ...string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "missing role"})
 			return
 		}
-		if _, ok := allowed[role.(string)]; !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "insufficient privileges"})
+		roleStr := role.(string)
+		if _, ok := allowed[roleStr]; !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("insufficient privileges: got %s, want one of %v", roleStr, roles)})
 			return
 		}
 		c.Next()
