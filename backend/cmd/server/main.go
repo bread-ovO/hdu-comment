@@ -61,7 +61,7 @@ func main() {
 
 	jwtManager := auth.NewJWTManager(cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL)
 
-	authService := services.NewAuthService(userRepo, jwtManager, refreshRepo, cfg.Auth.RefreshTokenTTL)
+	authService := services.NewAuthService(userRepo, jwtManager, refreshRepo, cfg.Auth.RefreshTokenTTL, cfg.Admin.Email)
 	reviewService := services.NewReviewService(reviewRepo, storageProvider)
 
 	authHandler := handlers.NewAuthHandler(authService)
@@ -69,7 +69,7 @@ func main() {
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 	adminReviewHandler := adminHandlers.NewReviewAdminHandler(reviewService)
 
-	authMiddleware := middleware.NewAuthMiddleware(jwtManager)
+	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
 
 	engine := gin.New()
 	engine.Use(gin.Logger(), gin.Recovery())

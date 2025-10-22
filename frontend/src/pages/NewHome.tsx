@@ -14,7 +14,7 @@ import {
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
-import { fetchReviews } from '../api/client';
+import { deleteReview, fetchReviews } from '../api/client';
 import ReviewCard from '../components/ReviewCard';
 import type { PaginatedResponse, Review } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -60,8 +60,19 @@ const NewHome = () => {
     }, [page, pageSize, sort, query]);
 
     const handleDelete = async (review: Review) => {
-        // 删除逻辑将在父组件处理
-        message.info('删除功能需要管理员权限');
+        if (user?.role !== 'admin') {
+            message.info('删除功能需要管理员权限');
+            return;
+        }
+
+        try {
+            await deleteReview(review.id);
+            message.success('点评已删除');
+            await load();
+        } catch (err) {
+            console.error(err);
+            message.error('删除失败，请稍后再试');
+        }
     };
 
     return (

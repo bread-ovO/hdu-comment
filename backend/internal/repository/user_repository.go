@@ -38,3 +38,8 @@ func (r *UserRepository) FindByID(id uuid.UUID) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+// Save persists changes to a user.
+func (r *UserRepository) Save(user *models.User) error {
+	return r.db.Save(user).Error
+}

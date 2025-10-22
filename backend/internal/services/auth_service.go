@@ -30,11 +30,13 @@ type AuthService struct {
 	tokens        *auth.JWTManager
 	refreshTokens *repository.RefreshTokenRepository
 	refreshTTL    time.Duration
+	adminEmail    string
 }
 
 // NewAuthService constructs an auth service instance.
-func NewAuthService(users *repository.UserRepository, tokens *auth.JWTManager, refreshRepo *repository.RefreshTokenRepository, refreshTTL time.Duration) *AuthService {
-	return &AuthService{users: users, tokens: tokens, refreshTokens: refreshRepo, refreshTTL: refreshTTL}
+func NewAuthService(users *repository.UserRepository, tokens *auth.JWTManager, refreshRepo *repository.RefreshTokenRepository, refreshTTL time.Duration, adminEmail string) *AuthService {
+	adminEmail = strings.TrimSpace(strings.ToLower(adminEmail))
+	return &AuthService{users: users, tokens: tokens, refreshTokens: refreshRepo, refreshTTL: refreshTTL, adminEmail: adminEmail}
 }
 
 // Register creates a new user account and issues token pair.
@@ -156,6 +158,13 @@ func (s *AuthService) Logout(token string) error {
 }
 
 func (s *AuthService) issueTokens(user *models.User) (*AuthResult, error) {
+	if s.adminEmail != "" && strings.EqualFold(user.Email, s.adminEmail) && user.Role != "admin" {
+		user.Role = "admin"
+		if err := s.users.Save(user); err != nil {
+			return nil, err
+		}
+	}
+
 	accessToken, err := s.tokens.Generate(user)
 	if err != nil {
 		return nil, err

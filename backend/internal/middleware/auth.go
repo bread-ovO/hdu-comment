@@ -8,16 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/hdu-dp/backend/internal/auth"
+	"github.com/hdu-dp/backend/internal/repository"
 )
 
 // AuthMiddleware handles JWT extraction and validation.
 type AuthMiddleware struct {
 	tokens *auth.JWTManager
+	users  *repository.UserRepository
 }
 
 // NewAuthMiddleware constructs an auth middleware instance.
-func NewAuthMiddleware(tokens *auth.JWTManager) *AuthMiddleware {
-	return &AuthMiddleware{tokens: tokens}
+func NewAuthMiddleware(tokens *auth.JWTManager, users *repository.UserRepository) *AuthMiddleware {
+	return &AuthMiddleware{tokens: tokens, users: users}
 }
 
 // RequireAuth ensures a valid JWT is provided.
@@ -41,8 +43,15 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 			return
 		}
 
+		user, err := m.users.FindByID(userID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
+
 		c.Set("user_id", userID)
-		c.Set("role", claims.Role)
+		c.Set("role", user.Role)
+		c.Set("user", user)
 		c.Next()
 	}
 }
@@ -68,8 +77,15 @@ func (m *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 			return
 		}
 
+		user, err := m.users.FindByID(userID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
+
 		c.Set("user_id", userID)
-		c.Set("role", claims.Role)
+		c.Set("role", user.Role)
+		c.Set("user", user)
 		c.Next()
 	}
 }
