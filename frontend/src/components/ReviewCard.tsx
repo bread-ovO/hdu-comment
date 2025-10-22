@@ -1,4 +1,4 @@
-import { Card, Tag, Typography, Avatar, Space, Rate, Button } from 'antd';
+import { Card, Tag, Typography, Space, Rate, Button, Popconfirm } from 'antd';
 import { Link } from 'react-router-dom';
 import {
     EnvironmentOutlined,
@@ -7,7 +7,6 @@ import {
     EyeOutlined
 } from '@ant-design/icons';
 import type { Review } from '../types';
-import { useAuth } from '../hooks/useAuth';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -15,10 +14,10 @@ interface ReviewCardProps {
     review: Review;
     onDelete?: (review: Review) => void;
     showStatus?: boolean;
+    canDelete?: boolean;
 }
 
-const ReviewCard = ({ review, onDelete, showStatus = false }: ReviewCardProps) => {
-    const { user } = useAuth();
+const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }: ReviewCardProps) => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -37,6 +36,34 @@ const ReviewCard = ({ review, onDelete, showStatus = false }: ReviewCardProps) =
             default: return status;
         }
     };
+
+    const actions = [
+        <Link to={`/reviews/${review.id}`} key="view">
+            <Button type="text" icon={<EyeOutlined />}>
+                查看详情
+            </Button>
+        </Link>
+    ];
+
+    if (canDelete && onDelete) {
+        actions.push(
+            <Popconfirm
+                key="delete"
+                title="确认删除该点评吗？"
+                okText="删除"
+                cancelText="取消"
+                okButtonProps={{ danger: true }}
+                onConfirm={(e) => {
+                    e?.preventDefault();
+                    onDelete(review);
+                }}
+            >
+                <Button type="text" danger>
+                    删除
+                </Button>
+            </Popconfirm>
+        );
+    }
 
     return (
         <Card
@@ -61,23 +88,7 @@ const ReviewCard = ({ review, onDelete, showStatus = false }: ReviewCardProps) =
                     </div>
                 )
             }
-            actions={[
-                <Link to={`/reviews/${review.id}`} key="view">
-                    <Button type="text" icon={<EyeOutlined />}>
-                        查看详情
-                    </Button>
-                </Link>,
-                ...(user?.role === 'admin' && onDelete ? [
-                    <Button
-                        key="delete"
-                        type="text"
-                        danger
-                        onClick={() => onDelete(review)}
-                    >
-                        删除
-                    </Button>
-                ] : [])
-            ]}
+            actions={actions}
         >
             <div className="review-card-content">
                 <Title level={4} className="review-title" ellipsis={{ rows: 1 }}>

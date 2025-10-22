@@ -162,6 +162,7 @@ const NewHome = () => {
                                         review={review}
                                         onDelete={handleDelete}
                                         showStatus={user?.role === 'admin'}
+                                        canDelete={user?.role === 'admin'}
                                     />
                                 </Col>
                             ))}
