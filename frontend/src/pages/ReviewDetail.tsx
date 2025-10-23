@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert, Card, Descriptions, Image, Space, Spin, Tag, Typography } from 'antd';
 import { fetchReviewDetail } from '../api/client';
+import { statsApi } from '../api/stats';
+import ReactionButtons from '../components/ReactionButtons';
 import type { Review } from '../types';
 
 const statusMap: Record<Review['status'], { text: string; color: string }> = {
@@ -23,8 +25,18 @@ const ReviewDetail = () => {
       setLoading(true);
       try {
         const data = await fetchReviewDetail(id);
-        setReview(data);
         setError('');
+
+        let reviewWithStats = data;
+
+        try {
+          const latestStats = await statsApi.getReviewStats(id);
+          reviewWithStats = { ...data, stats: latestStats };
+        } catch (statsError) {
+          console.error('Failed to load review stats:', statsError);
+        }
+
+        setReview(reviewWithStats);
       } catch (err) {
         console.error(err);
         setError('获取点评失败或没有权限查看');
@@ -65,6 +77,11 @@ const ReviewDetail = () => {
             </Descriptions.Item>
           )}
         </Descriptions>
+
+        <div style={{ marginTop: 16 }}>
+          <ReactionButtons review={review} />
+        </div>
+
         {review.images && review.images.length > 0 && (
           <Space wrap>
             {review.images.map((image) => (

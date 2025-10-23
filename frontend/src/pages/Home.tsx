@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { Button, Card, Col, Empty, Input, List, Modal, Row, Select, Space, Spin, Typography, message } from 'antd';
 import { Link } from 'react-router-dom';
 import { deleteReview, fetchReviews } from '../api/client';
+import SiteStats from '../components/SiteStats';
+import ReviewStatsDisplay from '../components/ReviewStatsDisplay';
 import type { PaginatedResponse, Review } from '../types';
 import { useAuth } from '../hooks/useAuth';
+import { statsApi } from '../api/stats';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -66,6 +69,8 @@ const Home = () => {
 
   return (
     <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <SiteStats />
+
       <Row justify="space-between" align="middle">
         <Col>
           <Title level={3}>最新点评</Title>
@@ -136,13 +141,27 @@ const Home = () => {
                     style={{ width: '100%', height: 180, objectFit: 'cover', borderRadius: 8 }}
                   />
                 )}
-                <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Link to={`/reviews/${review.id}`}>查看详情</Link>
-                  {user?.role === 'admin' && (
-                    <Button type="link" danger onClick={() => handleDelete(review)}>
-                      删除
-                    </Button>
-                  )}
+                <div style={{ marginTop: 12 }}>
+                  <ReviewStatsDisplay reviewId={review.id} />
+                  <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Link
+                      to={`/reviews/${review.id}`}
+                      onClick={() => {
+                        if (review.status === 'approved') {
+                          statsApi.recordView(review.id).catch((err) => {
+                            console.error('Failed to record review view:', err);
+                          });
+                        }
+                      }}
+                    >
+                      查看详情
+                    </Link>
+                    {user?.role === 'admin' && (
+                      <Button type="link" danger onClick={() => handleDelete(review)}>
+                        删除
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             </List.Item>

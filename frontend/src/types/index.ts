@@ -14,6 +14,16 @@ export interface ReviewImage {
   created_at: string;
 }
 
+export interface ReviewStats {
+  id: string;
+  review_id: string;
+  views: number;
+  likes: number;
+  dislikes: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Review {
   id: string;
   title: string;
@@ -25,6 +35,8 @@ export interface Review {
   author_id: string;
   author?: User;
   images?: ReviewImage[];
+  stats?: ReviewStats;
+  user_reaction?: 'like' | 'dislike' | null;
   created_at: string;
   updated_at: string;
 }
@@ -45,4 +57,20 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: PaginationMeta;
+}
+
+export interface SiteStats {
+  id: string;
+  total_views: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReactionResponse {
+  message: string;
+  action: string;
+}
+
+export interface UserReactionResponse {
+  reaction: 'like' | 'dislike' | null;
 }

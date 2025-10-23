@@ -13,13 +13,14 @@ import (
 
 // Params groups dependencies required for routing.
 type Params struct {
-	Engine          *gin.Engine
-	AuthMiddleware  *middleware.AuthMiddleware
-	AuthHandler     *handlers.AuthHandler
-	UserHandler     *handlers.UserHandler
-	ReviewHandler   *handlers.ReviewHandler
-	AdminHandler    *adminHandlers.ReviewAdminHandler
-	StaticUploadDir string
+	Engine             *gin.Engine
+	AuthMiddleware     *middleware.AuthMiddleware
+	AuthHandler        *handlers.AuthHandler
+	UserHandler        *handlers.UserHandler
+	ReviewHandler      *handlers.ReviewHandler
+	ReviewStatsHandler *handlers.ReviewStatsHandler
+	AdminHandler       *adminHandlers.ReviewAdminHandler
+	StaticUploadDir    string
 }
 
 // Register configures API routes on the provided engine.
@@ -49,6 +50,12 @@ func Register(p Params) {
 	// Detail endpoint should be accessible to authed/unauthed; optional auth ensures role-based access when provided.
 	api.GET("/reviews/:id", p.AuthMiddleware.OptionalAuth(), p.ReviewHandler.Detail)
 
+	// Review statistics endpoints
+	api.GET("/reviews/:id/stats", p.ReviewStatsHandler.GetReviewStats)
+	api.POST("/reviews/:id/view", p.ReviewStatsHandler.RecordView)
+	api.GET("/stats/site", p.ReviewStatsHandler.GetSiteStats)
+	api.GET("/stats/total-views", p.ReviewStatsHandler.GetTotalViews)
+
 	protected := api.Group("")
 	protected.Use(p.AuthMiddleware.RequireAuth())
 	{
@@ -57,6 +64,10 @@ func Register(p Params) {
 		protected.POST("/reviews", p.ReviewHandler.Submit)
 		protected.GET("/reviews/me", p.ReviewHandler.MyReviews)
 		protected.POST("/reviews/:id/images", p.ReviewHandler.UploadImage)
+
+		// Review reaction endpoints (require auth)
+		protected.POST("/reviews/:id/react", p.ReviewStatsHandler.ToggleReaction)
+		protected.GET("/reviews/:id/user-reaction", p.ReviewStatsHandler.GetUserReaction)
 	}
 
 	admin := api.Group("/admin")
