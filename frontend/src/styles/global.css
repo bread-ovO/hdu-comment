@@ -292,6 +292,25 @@ a:hover {
     color: var(--text-primary);
 }
 
+.ant-form-item-label > label {
+    color: var(--text-secondary) !important;
+}
+
+.ant-form-item .ant-input,
+.ant-form-item textarea,
+.ant-form-item .ant-input-number-input,
+.ant-form-item .ant-input-affix-wrapper,
+.ant-form-item .ant-select-selector {
+    color: var(--text-primary) !important;
+    background: var(--bg-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.ant-form-item .ant-input::placeholder,
+.ant-form-item textarea::placeholder {
+    color: var(--text-tertiary) !important;
+}
+
 .ant-statistic-title {
     color: var(--text-secondary) !important;
 }
