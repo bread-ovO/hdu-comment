@@ -1,15 +1,19 @@
-body {
-  margin: 0;
-  background-color: #f5f6fa;
-}
-
 #root {
   min-height: 100vh;
+  background-color: var(--bg-secondary);
+  transition: background-color var(--transition-normal);
 }
 
 main {
   max-width: 1080px;
   margin: 0 auto;
+  color: var(--text-primary);
+}
+
+.app-main {
+  padding: 24px 16px;
+  background-color: var(--bg-secondary);
+  transition: background-color var(--transition-normal);
 }
 
 .review-images {
@@ -23,4 +27,5 @@ main {
   height: 150px;
   object-fit: cover;
   border-radius: 8px;
+  box-shadow: var(--shadow-sm);
 }

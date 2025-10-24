@@ -127,36 +127,8 @@
     }
 }
 
-/* 暗色模式 */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: #1e293b;
-        --bg-secondary: #0f172a;
-        --bg-tertiary: #334155;
-        --text-primary: #f8fafc;
-        --text-secondary: #e2e8f0;
-        --text-tertiary: #cbd5e1;
-        --border-color: #334155;
-    }
-
-    .app-container {
-        background-color: var(--bg-secondary);
-    }
-
-    header {
-        background: rgba(30, 41, 59, 0.95);
-        border-bottom-color: #334155;
-    }
-
-    .review-card {
-        background: var(--bg-primary);
-        border-color: var(--border-color);
-    }
-
-    .home-pagination {
-        background: var(--bg-primary);
-        border-color: var(--border-color);
-    }
+[data-theme='dark'] .app-container {
+    background-color: var(--bg-secondary);
 }
 
 /* 减少动画偏好 */

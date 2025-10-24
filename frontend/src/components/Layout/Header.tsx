@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button, Drawer, Menu, Typography, Avatar, Dropdown } from 'antd';
+import { Button, Drawer, Menu, Typography, Avatar, Dropdown, Tooltip } from 'antd';
 import {
     MenuOutlined,
-    CloseOutlined,
     UserOutlined,
     LogoutOutlined,
     PlusOutlined,
@@ -11,9 +10,12 @@ import {
     AuditOutlined,
     CalendarOutlined,
     StarOutlined,
-    HomeOutlined
+    HomeOutlined,
+    MoonOutlined,
+    SunOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../contexts/ThemeContext';
 import type { MenuProps } from 'antd';
 
 const { Title, Text } = Typography;
@@ -22,6 +24,7 @@ const AppHeader = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { theme, toggleTheme } = useTheme();
 
     const menuItems: MenuProps['items'] = [
         {
@@ -103,14 +106,15 @@ const AppHeader = () => {
             onClose={() => setMobileMenuOpen(false)}
             open={mobileMenuOpen}
             width={280}
-            bodyStyle={{ padding: 0 }}
+            bodyStyle={{ padding: 0, background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
             <div style={{ padding: 16 }}>
                 <Menu
                     mode="vertical"
                     selectedKeys={[selectedKey]}
                     items={menuItems}
-                    style={{ border: 'none' }}
+                    style={{ border: 'none', background: 'transparent', color: 'var(--text-primary)' }}
+                    theme={theme === 'dark' ? 'dark' : 'light'}
                 />
             </div>
         </Drawer>
@@ -121,13 +125,14 @@ const AppHeader = () => {
             <MobileMenu />
 
             <header style={{
-                background: '#fff',
-                borderBottom: '1px solid #e5e7eb',
+                background: 'var(--header-bg)',
+                borderBottom: `1px solid var(--header-border)`,
                 position: 'sticky',
                 top: 0,
                 zIndex: 1000,
                 backdropFilter: 'blur(8px)',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                boxShadow: 'var(--header-shadow)',
+                color: 'var(--text-primary)',
             }}>
                 <div style={{
                     maxWidth: 1200,
@@ -144,13 +149,13 @@ const AppHeader = () => {
                         icon={<MenuOutlined />}
                         onClick={() => setMobileMenuOpen(true)}
                         className="mobile-menu-btn"
-                        style={{ display: 'none' }}
+                        style={{ display: 'none', color: 'var(--text-primary)' }}
                     />
 
                     {/* Logo */}
                     <Link to="/" style={{ textDecoration: 'none' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Title level={3} style={{ margin: 0, color: '#2563eb', fontSize: 24 }}>
+                            <Title level={3} style={{ margin: 0, color: 'var(--primary-color)', fontSize: 24 }}>
                                 杭电点评
                             </Title>
                         </div>
@@ -168,11 +173,21 @@ const AppHeader = () => {
                                 lineHeight: '64px',
                                 flex: 1
                             }}
+                            theme={theme === 'dark' ? 'dark' : 'light'}
                         />
                     </nav>
 
                     {/* 用户区域 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <Tooltip title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}>
+                            <Button
+                                type="text"
+                                icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+                                onClick={toggleTheme}
+                                aria-label="切换主题模式"
+                                style={{ color: 'var(--text-primary)' }}
+                            />
+                        </Tooltip>
                         {user ? (
                             <Dropdown
                                 menu={{ items: userMenuItems }}
@@ -193,7 +208,9 @@ const AppHeader = () => {
                         ) : (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Link to="/login">
-                                    <Button type="text">登录</Button>
+                                    <Button type="text" style={{ color: 'var(--text-primary)' }}>
+                                        登录
+                                    </Button>
                                 </Link>
                                 <Link to="/register">
                                     <Button type="primary">注册</Button>

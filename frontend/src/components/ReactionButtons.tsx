@@ -101,7 +101,7 @@ const ReactionButtons = ({ review, onReactionUpdate }: ReactionButtonsProps) => 
             >
                 踩 ({stats.dislikes})
             </Button>
-            <span style={{ color: '#666', marginLeft: 8 }}>
+            <span style={{ color: 'var(--text-secondary)', marginLeft: 8 }}>
                 浏览量: {stats.views}
             </span>
         </Space>

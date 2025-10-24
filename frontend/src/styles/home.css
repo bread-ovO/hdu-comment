@@ -20,7 +20,7 @@
 
 .home-subtitle {
     font-size: 18px;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 .home-search-section {
@@ -30,7 +30,10 @@
 
 .home-search-input {
     border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow-sm);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 .home-filters {
@@ -69,9 +72,10 @@
 
 .home-pagination {
     padding: 16px;
-    background: white;
+    background: var(--bg-primary);
     border-radius: 12px;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
 }
 
 /* 点评卡片样式 */
@@ -80,12 +84,14 @@
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    box-shadow: var(--shadow-sm);
 }
 
 .review-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .review-card-image-container {
@@ -120,7 +126,7 @@
     margin-bottom: 8px !important;
     font-size: 18px;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .review-meta {
@@ -134,11 +140,11 @@
 .rating-text {
     margin-left: 8px;
     font-weight: 600;
-    color: #f59e0b;
+    color: var(--warning-color);
 }
 
 .review-description {
-    color: #475569;
+    color: var(--text-secondary);
     margin-bottom: 16px;
     line-height: 1.5;
 }
@@ -152,7 +158,7 @@
 }
 
 .info-icon {
-    color: #94a3b8;
+    color: var(--text-tertiary);
     font-size: 14px;
 }
 
@@ -230,27 +236,6 @@
     }
 }
 
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-    .home-pagination {
-        background: #1e293b;
-        color: #f8fafc;
-    }
-
-    .review-card {
-        background: #1e293b;
-        border-color: #334155;
-    }
-
-    .review-title {
-        color: #f8fafc;
-    }
-
-    .review-description {
-        color: #cbd5e1;
-    }
-}
-
 /* 加载动画 */
 @keyframes shimmer {
     0% {
@@ -271,4 +256,11 @@
     animation: shimmer 1.5s infinite;
     border-radius: 12px;
     height: 400px;
+}
+
+[data-theme='dark'] .skeleton-card {
+    background: linear-gradient(90deg,
+            #1f2937 25%,
+            #273449 50%,
+            #1f2937 75%);
 }

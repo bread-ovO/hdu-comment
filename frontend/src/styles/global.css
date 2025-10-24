@@ -36,6 +36,9 @@
     --border-radius: 8px;
     --border-radius-lg: 12px;
     --border-radius-xl: 16px;
+    --header-bg: rgba(255, 255, 255, 0.9);
+    --header-border: rgba(226, 232, 240, 0.8);
+    --header-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
 
     /* 阴影 */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -66,6 +69,44 @@
     --transition-fast: 150ms ease-in-out;
     --transition-normal: 250ms ease-in-out;
     --transition-slow: 350ms ease-in-out;
+
+    color-scheme: light;
+}
+
+[data-theme='dark'] {
+    --primary-color: #60a5fa;
+    --primary-hover: #3b82f6;
+    --primary-light: rgba(96, 165, 250, 0.15);
+    --secondary-color: #94a3b8;
+
+    --bg-primary: #111827;
+    --bg-secondary: #0f172a;
+    --bg-tertiary: #1f2937;
+
+    --text-primary: #e2e8f0;
+    --text-secondary: #cbd5f5;
+    --text-tertiary: #94a3b8;
+
+    --gray-50: #0f172a;
+    --gray-100: #111827;
+    --gray-200: #1f2937;
+    --gray-300: #273449;
+    --gray-400: #334155;
+    --gray-500: #475569;
+    --gray-600: #64748b;
+    --gray-700: #94a3b8;
+    --gray-800: #cbd5f5;
+    --gray-900: #e2e8f0;
+
+    --border-color: rgba(148, 163, 184, 0.2);
+    --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.4);
+    --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.6), 0 2px 6px -2px rgb(15 23 42 / 0.5);
+    --shadow-lg: 0 20px 30px -10px rgb(15 23 42 / 0.6), 0 10px 15px -10px rgb(15 23 42 / 0.5);
+    --header-bg: rgba(15, 23, 42, 0.85);
+    --header-border: rgba(30, 41, 59, 0.8);
+    --header-shadow: 0 1px 10px rgb(0 0 0 / 0.45);
+
+    color-scheme: dark;
 }
 
 /* 重置样式 */
@@ -82,6 +123,7 @@ body {
     background-color: var(--bg-secondary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 /* 通用样式 */
@@ -217,6 +259,97 @@ body {
 
 .gap-2 {
     gap: var(--spacing-sm);
+}
+
+a {
+    color: var(--primary-color);
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+.ant-card {
+    background: var(--bg-primary) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
+}
+
+.ant-card-head {
+    border-color: var(--border-color) !important;
+}
+
+.ant-card-head-title,
+.ant-card-extra,
+.ant-card-meta-title,
+.ant-card-meta-description {
+    color: var(--text-primary) !important;
+}
+
+.ant-card-body {
+    color: var(--text-primary);
+}
+
+.ant-statistic-title {
+    color: var(--text-secondary) !important;
+}
+
+.ant-statistic-content-value {
+    color: var(--text-primary) !important;
+}
+
+.ant-dropdown-menu {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color);
+}
+
+.ant-dropdown-menu-item,
+.ant-dropdown-menu-item span {
+    color: var(--text-primary) !important;
+}
+
+.ant-dropdown-menu-item:hover {
+    background: var(--bg-tertiary) !important;
+}
+
+.ant-typography,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5,
+.ant-typography h6,
+.ant-typography p {
+    color: var(--text-primary) !important;
+}
+
+.ant-typography-secondary,
+.ant-typography p.ant-typography-secondary {
+    color: var(--text-secondary) !important;
+}
+
+.ant-descriptions {
+    background: var(--bg-primary);
+}
+
+.ant-descriptions-item-label {
+    color: var(--text-secondary) !important;
+}
+
+.ant-descriptions-item-content {
+    color: var(--text-primary) !important;
+}
+
+.ant-list-item,
+.ant-list-item-meta-title,
+.ant-list-item-meta-description {
+    color: var(--text-primary) !important;
+}
+
+.ant-list-item-meta-description {
+    color: var(--text-secondary) !important;
 }
 
 .gap-4 {
@@ -368,13 +501,13 @@ body {
 
 /* 头部样式 */
 header {
-    background: #fff;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
     position: sticky;
     top: 0;
     z-index: 1000;
     backdrop-filter: blur(8px);
-    background-color: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
 }
 
 header>div {
@@ -398,7 +531,7 @@ header>div {
 }
 
 .user-dropdown-trigger:hover {
-    background-color: #f3f4f6;
+    background-color: var(--bg-tertiary);
 }
 
 .desktop-nav {
@@ -422,13 +555,13 @@ header>div {
 }
 
 .desktop-nav .ant-menu-item:hover {
-    background-color: #f1f5f9;
-    color: #2563eb;
+    background-color: var(--bg-tertiary);
+    color: var(--primary-color);
 }
 
 .desktop-nav .ant-menu-item-selected {
-    background-color: #e0e7ff;
-    color: #2563eb;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
     font-weight: 600;
 }
 
@@ -470,9 +603,19 @@ header>div {
 
 /* 加载状态 */
 .skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background: linear-gradient(90deg,
+            var(--bg-tertiary) 25%,
+            var(--bg-secondary) 50%,
+            var(--bg-tertiary) 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
+}
+
+[data-theme='dark'] .skeleton {
+    background: linear-gradient(90deg,
+            #1f2937 25%,
+            #273449 50%,
+            #1f2937 75%);
 }
 
 @keyframes loading {
@@ -483,4 +626,38 @@ header>div {
     100% {
         background-position: -200% 0;
     }
+}
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-select-dropdown,
+.ant-select-item-option,
+.ant-select-item-option-content,
+.ant-menu,
+.ant-menu-item a,
+.ant-pagination,
+.ant-pagination-item,
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.ant-input::placeholder {
+    color: var(--text-tertiary) !important;
+}
+
+.ant-select-item-option-active,
+.ant-select-item-option-selected {
+    background: var(--bg-tertiary) !important;
+    color: var(--primary-color) !important;
+}
+
+.ant-pagination-item-active {
+    border-color: var(--primary-color) !important;
+}
+
+.ant-pagination-item-active a {
+    color: var(--primary-color) !important;
 }
