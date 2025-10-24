@@ -48,8 +48,13 @@ const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }:
     };
 
     const actions = [
-        <Link to={`/reviews/${review.id}`} key="view">
-            <Button type="text" icon={<EyeOutlined />} onClick={handleViewDetail}>
+        <Link to={`/reviews/${review.id}`} key="view" style={{ display: 'inline-block', width: '100%' }}>
+            <Button
+                block
+                type="text"
+                icon={<EyeOutlined />}
+                onClick={handleViewDetail}
+            >
                 查看详情
             </Button>
         </Link>
@@ -68,7 +73,7 @@ const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }:
                     onDelete(review);
                 }}
             >
-                <Button type="text" danger>
+                <Button type="text" danger block>
                     删除
                 </Button>
             </Popconfirm>

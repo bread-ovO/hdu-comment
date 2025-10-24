@@ -314,6 +314,85 @@ a:hover {
     background: var(--bg-tertiary) !important;
 }
 
+.ant-btn,
+.ant-pagination-item,
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link,
+.ant-select-selector,
+.ant-input,
+.ant-input-affix-wrapper {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.ant-btn-primary {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.ant-btn-primary:not(:disabled):hover,
+.ant-btn-primary:not(:disabled):active,
+.ant-btn-primary:not(:disabled):focus {
+    background: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+    color: #fff !important;
+}
+
+.ant-btn-text,
+.ant-btn-link {
+    color: var(--text-primary) !important;
+}
+
+.ant-btn-text:hover,
+.ant-btn-link:hover {
+    color: var(--primary-color) !important;
+    background: var(--bg-tertiary) !important;
+}
+
+.ant-btn-dangerous.ant-btn-text,
+.ant-btn-dangerous.ant-btn-link {
+    color: var(--error-color) !important;
+}
+
+.ant-btn-dangerous.ant-btn-text:hover,
+.ant-btn-dangerous.ant-btn-link:hover {
+    color: var(--error-color) !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.ant-card-actions {
+    background: var(--bg-primary) !important;
+    border-top: 1px solid var(--border-color) !important;
+    display: flex;
+}
+
+.ant-card-actions > li {
+    margin: 0 !important;
+    background: var(--bg-primary) !important;
+    border-right: 1px solid var(--border-color) !important;
+    flex: 1 !important;
+    padding: 0 !important;
+}
+
+.ant-card-actions > li > span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent !important;
+    width: 100%;
+}
+
+.ant-card-actions > li:last-child {
+    border-right: none !important;
+}
+
+.ant-card-actions .ant-btn {
+    width: 100%;
+    justify-content: center;
+}
+
 .ant-typography,
 .ant-typography h1,
 .ant-typography h2,
@@ -350,6 +429,58 @@ a:hover {
 
 .ant-list-item-meta-description {
     color: var(--text-secondary) !important;
+}
+
+.ant-input::placeholder {
+    color: var(--text-tertiary) !important;
+}
+
+.ant-select-dropdown,
+.ant-select-item {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+.ant-select-item-option-content {
+    color: var(--text-primary) !important;
+}
+
+.ant-select-item-option-active .ant-select-item-option-content,
+.ant-select-item-option-selected .ant-select-item-option-content {
+    color: var(--primary-color) !important;
+}
+
+.ant-select-item-option-active,
+.ant-select-item-option-selected {
+    background: var(--bg-tertiary) !important;
+    color: var(--primary-color) !important;
+}
+
+.ant-pagination,
+.ant-pagination-item a {
+    color: var(--text-primary) !important;
+}
+
+.ant-pagination-item > a {
+    color: var(--text-primary) !important;
+}
+
+.ant-pagination-item-link {
+    color: var(--text-primary) !important;
+    background: var(--bg-primary) !important;
+}
+
+.ant-pagination-item-link:hover {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.ant-pagination-item-active {
+    border-color: var(--primary-color) !important;
+}
+
+.ant-pagination-item-active a {
+    color: var(--primary-color) !important;
 }
 
 .gap-4 {
@@ -567,6 +698,58 @@ header>div {
 
 .desktop-nav .ant-menu-item::after {
     display: none;
+}
+
+[data-theme='dark'] .desktop-nav .ant-menu {
+    background: transparent !important;
+}
+
+[data-theme='dark'] .desktop-nav .ant-menu-item a {
+    color: var(--text-primary) !important;
+}
+
+[data-theme='dark'] .desktop-nav .ant-menu-item-selected,
+[data-theme='dark'] .desktop-nav .ant-menu-item-selected a {
+    color: var(--primary-color) !important;
+}
+
+.ant-menu-dark {
+    background: transparent !important;
+}
+
+.ant-menu-dark .ant-menu-item,
+.ant-menu-dark .ant-menu-submenu-title {
+    color: var(--text-primary) !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-dark .ant-menu-item-selected a,
+.ant-menu-dark .ant-menu-item-selected .ant-menu-title-content {
+    background: var(--primary-light) !important;
+    color: var(--primary-color) !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover,
+.ant-menu-dark .ant-menu-submenu-title:hover {
+    color: var(--primary-color) !important;
+    background: var(--bg-tertiary) !important;
+}
+
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-submenu {
+    border-color: transparent !important;
+}
+
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item:hover,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-submenu:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--primary-color) !important;
+}
+
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-item-selected,
+.ant-menu-dark.ant-menu-horizontal > .ant-menu-submenu-selected {
+    background: var(--primary-light) !important;
+    color: var(--primary-color) !important;
 }
 
 /* 动画 */

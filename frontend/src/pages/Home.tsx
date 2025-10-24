@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Card, Col, Empty, Input, List, Modal, Row, Select, Space, Spin, Typography, message } from 'antd';
 import { Link } from 'react-router-dom';
+import { EyeOutlined } from '@ant-design/icons';
 import { deleteReview, fetchReviews } from '../api/client';
 import SiteStats from '../components/SiteStats';
 import ReviewStatsDisplay from '../components/ReviewStatsDisplay';
@@ -143,9 +144,10 @@ const Home = () => {
                 )}
                 <div style={{ marginTop: 12 }}>
                   <ReviewStatsDisplay reviewId={review.id} />
-                  <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                     <Link
                       to={`/reviews/${review.id}`}
+                      style={{ flex: 1 }}
                       onClick={() => {
                         if (review.status === 'approved') {
                           statsApi.recordView(review.id).catch((err) => {
@@ -154,10 +156,22 @@ const Home = () => {
                         }
                       }}
                     >
-                      查看详情
+                      <Button
+                        block
+                        type="text"
+                        icon={<EyeOutlined />}
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        查看详情
+                      </Button>
                     </Link>
                     {user?.role === 'admin' && (
-                      <Button type="link" danger onClick={() => handleDelete(review)}>
+                      <Button
+                        block
+                        type="text"
+                        danger
+                        onClick={() => handleDelete(review)}
+                      >
                         删除
                       </Button>
                     )}
