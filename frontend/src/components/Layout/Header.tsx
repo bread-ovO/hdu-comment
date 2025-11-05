@@ -198,7 +198,7 @@ const AppHeader = () => {
                                     <Avatar
                                         size={32}
                                         icon={<UserOutlined />}
-                                        style={{ backgroundColor: '#2563eb' }}
+                                        style={{ backgroundColor: 'var(--primary-color)' }}
                                     />
                                     <Text className="desktop-only">
                                         {user.display_name}

@@ -81,14 +81,31 @@ const ReactionButtons = ({ review, onReactionUpdate }: ReactionButtonsProps) => 
         }
     };
 
+    // 移动端触摸事件处理
+    const handleTouchStart = (e: React.TouchEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        target.classList.add('touch-active');
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const target = e.currentTarget as HTMLElement;
+        setTimeout(() => {
+            target.classList.remove('touch-active');
+        }, 200);
+    };
+
     return (
-        <Space>
+        <Space className="reaction-buttons-container">
             <Button
                 type={userReaction === 'like' ? 'primary' : 'default'}
                 icon={<LikeOutlined />}
                 onClick={() => handleReaction('like')}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
                 loading={loading}
                 disabled={!user}
+                className="reaction-button"
+                size="large"
             >
                 赞 ({stats.likes})
             </Button>
@@ -96,8 +113,12 @@ const ReactionButtons = ({ review, onReactionUpdate }: ReactionButtonsProps) => 
                 type={userReaction === 'dislike' ? 'primary' : 'default'}
                 icon={<DislikeOutlined />}
                 onClick={() => handleReaction('dislike')}
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
                 loading={loading}
                 disabled={!user}
+                className="reaction-button"
+                size="large"
             >
                 踩 ({stats.dislikes})
             </Button>

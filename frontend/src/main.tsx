@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import App from './App';
 import 'antd/dist/reset.css';
 import './styles.css';
+import './styles/mobile-touch.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

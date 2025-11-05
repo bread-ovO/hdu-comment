@@ -5,9 +5,9 @@ import { fetchMyReviews } from '../api/client';
 import type { Review } from '../types';
 
 const statusMap: Record<Review['status'], { text: string; color: string }> = {
-  pending: { text: '待审核', color: 'orange' },
-  approved: { text: '已通过', color: 'green' },
-  rejected: { text: '已驳回', color: 'red' }
+  pending: { text: '待审核', color: 'var(--warning-color)' },
+  approved: { text: '已通过', color: 'var(--success-color)' },
+  rejected: { text: '已驳回', color: 'var(--error-color)' }
 };
 
 const MyReviews = () => {

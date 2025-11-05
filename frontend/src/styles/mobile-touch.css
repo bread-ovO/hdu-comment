@@ -1,0 +1,154 @@
+/* 移动端触摸优化样式 */
+@media (hover: none) and (pointer: coarse) {
+
+    /* 增大触摸目标区域 */
+    .ant-btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 16px;
+        font-size: 16px;
+        /* 防止iOS缩放 */
+    }
+
+    /* 反应按钮触摸优化 */
+    .reaction-buttons-container {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .reaction-button {
+        position: relative;
+        min-height: 48px;
+        min-width: 48px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .reaction-button:active {
+        transform: scale(0.95);
+        background-color: var(--primary-light);
+    }
+
+    .reaction-button::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        border-radius: 12px;
+        z-index: -1;
+    }
+
+    /* 防止双击缩放 */
+    .reaction-button,
+    .ant-btn {
+        touch-action: manipulation;
+    }
+
+    /* 触摸反馈动画 */
+    @keyframes touch-feedback {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(0.95);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .reaction-button.touch-active {
+        animation: touch-feedback 0.2s ease;
+    }
+
+    /* 移动端间距调整 */
+    .ant-space {
+        gap: 12px !important;
+    }
+
+    /* 防止文本选择 */
+    .reaction-button {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* 移动端卡片内边距调整 */
+    .review-card .ant-card-body {
+        padding: 16px;
+    }
+
+    /* 移动端按钮组 */
+    .mobile-reaction-group {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .mobile-reaction-group .ant-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* 小屏幕优化 */
+@media (max-width: 480px) {
+    .reaction-buttons-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reaction-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .mobile-reaction-group {
+        flex-direction: column;
+    }
+}
+
+/* 触摸设备悬停效果禁用 */
+@media (hover: none) {
+    .ant-btn:hover {
+        transform: none;
+    }
+
+    .reaction-button:hover {
+        transform: none;
+    }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+    .reaction-button {
+        border: 2px solid currentColor;
+    }
+
+    .reaction-button:active {
+        border-color: var(--primary-color);
+    }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+
+    .reaction-button,
+    .ant-btn {
+        transition: none;
+    }
+
+    .reaction-button.touch-active {
+        animation: none;
+    }
+}
