@@ -34,7 +34,16 @@ func Init(cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err = db.AutoMigrate(&models.User{}, &models.Review{}, &models.ReviewImage{}, &models.RefreshToken{}, &models.ReviewStats{}, &models.ReviewReaction{}, &models.SiteStats{}); err != nil {
+	if err = db.AutoMigrate(
+		&models.User{},
+		&models.EmailVerification{},
+		&models.Review{},
+		&models.ReviewImage{},
+		&models.RefreshToken{},
+		&models.ReviewStats{},
+		&models.ReviewReaction{},
+		&models.SiteStats{},
+	); err != nil {
 		return nil, fmt.Errorf("auto migrate: %w", err)
 	}
 

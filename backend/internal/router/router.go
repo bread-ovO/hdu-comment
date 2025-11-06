@@ -16,10 +16,12 @@ type Params struct {
 	Engine             *gin.Engine
 	AuthMiddleware     *middleware.AuthMiddleware
 	AuthHandler        *handlers.AuthHandler
+	EmailVerificationHandler *handlers.EmailVerificationHandler
 	UserHandler        *handlers.UserHandler
 	ReviewHandler      *handlers.ReviewHandler
 	ReviewStatsHandler *handlers.ReviewStatsHandler
 	AdminHandler       *adminHandlers.ReviewAdminHandler
+	AdminUserHandler   *adminHandlers.UserAdminHandler
 	StaticUploadDir    string
 }
 
@@ -35,6 +37,14 @@ func Register(p Params) {
 		auth.POST("/login", p.AuthHandler.Login)
 		auth.POST("/refresh", p.AuthHandler.Refresh)
 		auth.POST("/logout", p.AuthHandler.Logout)
+		if p.EmailVerificationHandler != nil {
+			auth.POST("/send-code", p.EmailVerificationHandler.SendRegistrationCode)
+			auth.POST("/verify-email", p.EmailVerificationHandler.VerifyEmail)
+			if p.AuthMiddleware != nil {
+				auth.POST("/send-verification", p.AuthMiddleware.RequireAuth(), p.EmailVerificationHandler.SendVerificationEmail)
+				auth.GET("/verification-status", p.AuthMiddleware.RequireAuth(), p.EmailVerificationHandler.GetVerificationStatus)
+			}
+		}
 	}
 
 	if p.StaticUploadDir != "" {
@@ -77,5 +87,9 @@ func Register(p Params) {
 		admin.PUT("/reviews/:id/approve", p.AdminHandler.Approve)
 		admin.PUT("/reviews/:id/reject", p.AdminHandler.Reject)
 		admin.DELETE("/reviews/:id", p.AdminHandler.Delete)
+		if p.AdminUserHandler != nil {
+			admin.GET("/users", p.AdminUserHandler.List)
+			admin.DELETE("/users/:id", p.AdminUserHandler.Delete)
+		}
 	}
 }

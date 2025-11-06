@@ -12,7 +12,8 @@ import {
     StarOutlined,
     HomeOutlined,
     MoonOutlined,
-    SunOutlined
+    SunOutlined,
+    TeamOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -60,16 +61,25 @@ const AppHeader = () => {
     }
 
     if (user?.role === 'admin') {
-        menuItems.push({
-            key: '/admin/reviews',
-            label: <Link to="/admin/reviews">审核中心</Link>,
-            icon: <AuditOutlined />
-        });
+        menuItems.push(
+            {
+                key: '/admin/users',
+                label: <Link to="/admin/users">用户管理</Link>,
+                icon: <TeamOutlined />
+            },
+            {
+                key: '/admin/reviews',
+                label: <Link to="/admin/reviews">审核中心</Link>,
+                icon: <AuditOutlined />
+            }
+        );
     }
 
-    const selectedKey = location.pathname.startsWith('/admin')
-        ? '/admin/reviews'
-        : location.pathname.startsWith('/submit')
+    const selectedKey = location.pathname.startsWith('/admin/users')
+        ? '/admin/users'
+        : location.pathname.startsWith('/admin/reviews')
+            ? '/admin/reviews'
+            : location.pathname.startsWith('/submit')
             ? '/submit'
             : location.pathname.startsWith('/my')
                 ? '/my'

@@ -53,9 +53,19 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	reviewRepo := repository.NewReviewRepository(db)
 	refreshRepo := repository.NewRefreshTokenRepository(db)
+	emailVerificationRepo := repository.NewEmailVerificationRepository(db)
 	reviewStatsRepo := repository.NewReviewStatsRepository(db)
 	reviewReactionRepo := repository.NewReviewReactionRepository(db)
 	siteStatsRepo := repository.NewSiteStatsRepository(db)
+
+	emailCfg := config.LoadEmailConfig()
+	emailService := services.NewEmailService(emailCfg)
+	emailVerificationService := services.NewEmailVerificationService(
+		emailVerificationRepo,
+		userRepo,
+		emailService,
+		emailCfg.FrontendBaseURL,
+	)
 
 	storageProvider, err := storage.New(cfg)
 	if err != nil {
@@ -68,22 +78,33 @@ func main() {
 	reviewService := services.NewReviewService(reviewRepo, storageProvider)
 	reviewStatsService := services.NewReviewStatsService(reviewStatsRepo, reviewReactionRepo, siteStatsRepo)
 
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, emailVerificationService)
 	userHandler := handlers.NewUserHandler(userRepo)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 	reviewStatsHandler := handlers.NewReviewStatsHandler(reviewStatsService)
 	adminReviewHandler := adminHandlers.NewReviewAdminHandler(reviewService)
+	adminUserHandler := adminHandlers.NewUserAdminHandler(userRepo)
+	emailVerificationHandler := handlers.NewEmailVerificationHandler(emailVerificationService)
 
 	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
 
 	engine := gin.New()
 	engine.Use(gin.Logger(), gin.Recovery())
-	engine.Use(cors.New(cors.Config{
-		AllowOrigins:  []string{"*"},
-		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:  []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders: []string{"Content-Length"},
-	}))
+	corsConfig := cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"http://localhost:5174",
+			"http://127.0.0.1:5173",
+			"http://127.0.0.1:5174",
+			"https://hddp.blueloaf.top",
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}
+
+	engine.Use(cors.New(corsConfig))
 
 	staticUploads := cfg.Storage.UploadDir
 	if cfg.Storage.Provider != "local" && cfg.Storage.Provider != "" {
@@ -97,7 +118,9 @@ func main() {
 		UserHandler:        userHandler,
 		ReviewHandler:      reviewHandler,
 		ReviewStatsHandler: reviewStatsHandler,
+		EmailVerificationHandler: emailVerificationHandler,
 		AdminHandler:       adminReviewHandler,
+		AdminUserHandler:   adminUserHandler,
 		StaticUploadDir:    staticUploads,
 	})
 

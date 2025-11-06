@@ -8,6 +8,7 @@ import SubmitReview from './pages/SubmitReview';
 import MyReviews from './pages/MyReviews';
 import ReviewDetail from './pages/ReviewDetail';
 import AdminPending from './pages/AdminPending';
+import AdminUsers from './pages/AdminUsers';
 import NotFound from './pages/NotFound';
 import './styles/global.css';
 import './styles/home.css';
@@ -32,7 +33,8 @@ const App = () => {
 
           <Route element={<ProtectedRoute requireAdmin />}>
             <Route path="/admin/reviews" element={<AdminPending />} />
-           </Route>
+            <Route path="/admin/users" element={<AdminUsers />} />
+          </Route>
            {/* Fallback route for 404 Not Found */}
            <Route path="*" element={<NotFound />} />
           </Routes>

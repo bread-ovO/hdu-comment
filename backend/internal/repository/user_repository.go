@@ -43,3 +43,30 @@ func (r *UserRepository) FindByID(id uuid.UUID) (*models.User, error) {
 func (r *UserRepository) Save(user *models.User) error {
 	return r.db.Save(user).Error
 }
+
+// List returns users ordered by creation time desc with pagination.
+func (r *UserRepository) List(offset, limit int) ([]models.User, error) {
+	var users []models.User
+	query := r.db.Order("created_at desc")
+	if limit > 0 {
+		query = query.Offset(offset).Limit(limit)
+	}
+	if err := query.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+// Count returns total count of users.
+func (r *UserRepository) Count() (int64, error) {
+	var total int64
+	if err := r.db.Model(&models.User{}).Count(&total).Error; err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
+// Delete removes a user by id.
+func (r *UserRepository) Delete(id uuid.UUID) error {
+	return r.db.Delete(&models.User{}, "id = ?", id).Error
+}

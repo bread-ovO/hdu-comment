@@ -14,6 +14,8 @@ type User struct {
 	PasswordHash string    `gorm:"size:255;not null" json:"-"`
 	DisplayName  string    `gorm:"size:100;not null" json:"display_name"`
 	Role         string    `gorm:"size:20;default:user" json:"role"`
+	EmailVerified bool      `gorm:"default:false" json:"email_verified"`
+	EmailVerifiedAt *time.Time `json:"email_verified_at"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	Reviews      []Review  `gorm:"foreignKey:AuthorID" json:"-"`

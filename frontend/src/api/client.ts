@@ -82,13 +82,18 @@ export interface ReviewQueryParams {
   order?: 'asc' | 'desc';
 }
 
-export const register = async (email: string, password: string, displayName: string): Promise<AuthResponse> => {
+export const register = async (email: string, password: string, displayName: string, code: string): Promise<AuthResponse> => {
   const { data } = await api.post<AuthResponse>('/auth/register', {
     email,
     password,
-    display_name: displayName
+    display_name: displayName,
+    code
   });
   return data;
+};
+
+export const requestRegistrationCode = async (email: string): Promise<void> => {
+  await rawApi.post('/auth/send-code', { email });
 };
 
 export const login = async (email: string, password: string): Promise<AuthResponse> => {
@@ -160,4 +165,22 @@ export const rejectReview = async (id: string, reason: string): Promise<Review> 
 
 export const deleteReview = async (id: string): Promise<void> => {
   await api.delete(`/admin/reviews/${id}`);
+};
+
+export interface AdminUserListResponse {
+  data: User[];
+  pagination: {
+    page: number;
+    page_size: number;
+    total: number;
+  };
+}
+
+export const fetchAdminUsers = async (params: { page?: number; page_size?: number }): Promise<AdminUserListResponse> => {
+  const { data } = await api.get<AdminUserListResponse>('/admin/users', { params });
+  return data;
+};
+
+export const deleteAdminUser = async (id: string): Promise<void> => {
+  await api.delete(`/admin/users/${id}`);
 };

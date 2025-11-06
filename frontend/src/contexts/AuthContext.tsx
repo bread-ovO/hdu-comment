@@ -26,7 +26,7 @@ interface AuthContextValue {
   refreshToken: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, displayName: string) => Promise<void>;
+  register: (email: string, password: string, displayName: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -62,7 +62,11 @@ const readLocalUser = (): User | null => {
   try {
     const raw = localStorage.getItem(USER_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as User;
+    const parsed = JSON.parse(raw) as User;
+    if (typeof parsed.email_verified !== 'boolean') {
+      parsed.email_verified = true;
+    }
+    return parsed;
   } catch (err) {
     console.warn('unable to read cached user', err);
     return null;
@@ -161,8 +165,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [persist]);
 
   const handleRegister = useCallback(
-    async (email: string, password: string, displayName: string) => {
-      const auth = await apiRegister(email, password, displayName);
+    async (email: string, password: string, displayName: string, code: string) => {
+      const auth = await apiRegister(email, password, displayName, code);
       persist(auth);
     },
     [persist]

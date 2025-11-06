@@ -51,6 +51,8 @@ func (h *UserHandler) Me(c *gin.Context) {
 		"email":        user.Email,
 		"display_name": user.DisplayName,
 		"role":         user.Role,
+		"email_verified":   user.EmailVerified,
+		"email_verified_at": user.EmailVerifiedAt,
 		"created_at":   user.CreatedAt,
 	})
 }
