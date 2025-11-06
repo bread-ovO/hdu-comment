@@ -41,6 +41,9 @@ type Config struct {
 		Email    string
 		Password string
 	}
+	CORS struct {
+		AllowOrigins []string
+	}
 }
 
 // Load reads configuration from environment variables with sane defaults.
@@ -69,6 +72,7 @@ func Load() (*Config, error) {
 	v.SetDefault("STORAGE_S3_SECRET_KEY", "")
 	v.SetDefault("STORAGE_S3_USE_SSL", true)
 	v.SetDefault("STORAGE_S3_BASE_URL", "")
+	v.SetDefault("CORS_ALLOW_ORIGINS", "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174,https://hddp.blueloaf.top")
 
 	accessTTL, err := time.ParseDuration(v.GetString("AUTH_ACCESS_TOKEN_TTL"))
 	if err != nil {
@@ -104,10 +108,26 @@ func Load() (*Config, error) {
 
 	cfg.Admin.Email = strings.TrimSpace(strings.ToLower(v.GetString("ADMIN_EMAIL")))
 	cfg.Admin.Password = strings.TrimSpace(v.GetString("ADMIN_PASSWORD"))
+	cfg.CORS.AllowOrigins = splitAndClean(v.GetString("CORS_ALLOW_ORIGINS"))
 
 	if cfg.Auth.JWTSecret == "" {
 		return nil, fmt.Errorf("missing auth jwt secret: set APP_AUTH_JWT_SECRET")
 	}
 
 	return cfg, nil
+}
+
+func splitAndClean(value string) []string {
+	if value == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }

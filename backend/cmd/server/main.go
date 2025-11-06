@@ -90,14 +90,20 @@ func main() {
 
 	engine := gin.New()
 	engine.Use(gin.Logger(), gin.Recovery())
-	corsConfig := cors.Config{
-		AllowOrigins: []string{
+
+	allowedOrigins := cfg.CORS.AllowOrigins
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{
 			"http://localhost:5173",
 			"http://localhost:5174",
 			"http://127.0.0.1:5173",
 			"http://127.0.0.1:5174",
 			"https://hddp.blueloaf.top",
-		},
+		}
+	}
+
+	corsConfig := cors.Config{
+		AllowOrigins:     allowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
