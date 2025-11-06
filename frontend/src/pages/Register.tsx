@@ -20,20 +20,22 @@ const Register = () => {
   }, [countdown]);
 
   const handleSendCode = async () => {
+    const email = form.getFieldValue('email');
     try {
-      const email = form.getFieldValue('email');
       await form.validateFields(['email']);
-      setError('');
-      setSendingCode(true);
+    } catch {
+      return;
+    }
+
+    setError('');
+    setSendingCode(true);
+    setCountdown(60);
+
+    try {
       await authApi.sendRegistrationCode(email);
       message.success('验证码已发送，请查收邮箱');
-      setCountdown(60);
-    } catch (err: any) {
-      if (err?.errorFields) {
-        return;
-      }
+    } catch (err) {
       console.error(err);
-      setError(err?.response?.data?.error || '发送验证码失败，请稍后再试');
     } finally {
       setSendingCode(false);
     }
