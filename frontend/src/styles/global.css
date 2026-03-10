@@ -462,6 +462,7 @@ a:hover {
 
 .ant-select-item-option-content {
     color: var(--text-primary) !important;
+    background: transparent !important;
 }
 
 .ant-select-item-option-active .ant-select-item-option-content,
@@ -741,10 +742,13 @@ header>div {
     color: var(--text-primary) !important;
 }
 
-.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-dark .ant-menu-item-selected {
+    background: var(--primary-light) !important;
+}
+
 .ant-menu-dark .ant-menu-item-selected a,
 .ant-menu-dark .ant-menu-item-selected .ant-menu-title-content {
-    background: var(--primary-light) !important;
+    background: transparent !important;
     color: var(--primary-color) !important;
 }
 
@@ -834,9 +838,7 @@ header>div {
 .ant-select-selector,
 .ant-select-dropdown,
 .ant-select-item-option,
-.ant-select-item-option-content,
 .ant-menu,
-.ant-menu-item a,
 .ant-pagination,
 .ant-pagination-item,
 .ant-pagination-prev .ant-pagination-item-link,
@@ -844,6 +846,11 @@ header>div {
     background: var(--bg-primary) !important;
     color: var(--text-primary) !important;
     border-color: var(--border-color) !important;
+}
+
+.ant-select-item-option-content,
+.ant-menu-item a {
+    background: transparent !important;
 }
 
 .ant-input::placeholder {

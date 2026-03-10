@@ -14,6 +14,7 @@ import './styles/global.css';
 import './styles/home.css';
 import './styles/responsive.css';
 import './styles/lazy-image.css';
+import './styles/polish.css';
 
 const App = () => {
   return (

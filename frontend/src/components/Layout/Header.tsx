@@ -83,6 +83,10 @@ const AppHeader = () => {
             ? '/submit'
             : location.pathname.startsWith('/my')
                 ? '/my'
+                : location.pathname === '/' && new URLSearchParams(location.search).get('sort') === 'rating'
+                    ? '/popular'
+                    : location.pathname === '/' && new URLSearchParams(location.search).get('sort') === 'created_at'
+                        ? '/latest'
                 : '/';
 
     const userMenuItems: MenuProps['items'] = [
@@ -116,6 +120,7 @@ const AppHeader = () => {
             onClose={() => setMobileMenuOpen(false)}
             open={mobileMenuOpen}
             width={280}
+            className="mobile-menu-drawer"
             bodyStyle={{ padding: 0, background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
             <div style={{ padding: 16 }}>
@@ -134,68 +139,42 @@ const AppHeader = () => {
         <>
             <MobileMenu />
 
-            <header style={{
-                background: 'var(--header-bg)',
-                borderBottom: `1px solid var(--header-border)`,
-                position: 'sticky',
-                top: 0,
-                zIndex: 1000,
-                backdropFilter: 'blur(8px)',
-                boxShadow: 'var(--header-shadow)',
-                color: 'var(--text-primary)',
-            }}>
-                <div style={{
-                    maxWidth: 1200,
-                    margin: '0 auto',
-                    padding: '0 16px',
-                    height: 64,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                }}>
-                    {/* 移动端菜单按钮 */}
+            <header className="site-header">
+                <div className="site-header-inner">
                     <Button
                         type="text"
                         icon={<MenuOutlined />}
                         onClick={() => setMobileMenuOpen(true)}
                         className="mobile-menu-btn"
-                        style={{ display: 'none', color: 'var(--text-primary)' }}
                     />
 
-                    {/* Logo */}
-                    <Link to="/" style={{ textDecoration: 'none' }}>
+                    <Link to="/" className="brand-link">
+                        <div className="brand-mark" aria-hidden />
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Title level={3} style={{ margin: 0, color: 'var(--primary-color)', fontSize: 24 }}>
+                            <Title level={3} className="brand-title">
                                 杭电点评
                             </Title>
                         </div>
                     </Link>
 
-                    {/* 桌面端导航 */}
                     <nav className="desktop-nav">
                         <Menu
                             mode="horizontal"
                             selectedKeys={[selectedKey]}
                             items={menuItems}
-                            style={{
-                                border: 'none',
-                                background: 'transparent',
-                                lineHeight: '64px',
-                                flex: 1
-                            }}
+                            style={{ border: 'none', background: 'transparent', lineHeight: '64px', flex: 1 }}
                             theme={theme === 'dark' ? 'dark' : 'light'}
                         />
                     </nav>
 
-                    {/* 用户区域 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div className="header-actions">
                         <Tooltip title={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}>
                             <Button
                                 type="text"
                                 icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
                                 onClick={toggleTheme}
                                 aria-label="切换主题模式"
-                                style={{ color: 'var(--text-primary)' }}
+                                className="theme-toggle-btn"
                             />
                         </Tooltip>
                         {user ? (
@@ -216,9 +195,9 @@ const AppHeader = () => {
                                 </div>
                             </Dropdown>
                         ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className="auth-links">
                                 <Link to="/login">
-                                    <Button type="text" style={{ color: 'var(--text-primary)' }}>
+                                    <Button type="text">
                                         登录
                                     </Button>
                                 </Link>
@@ -230,18 +209,6 @@ const AppHeader = () => {
                     </div>
                 </div>
             </header>
-
-            <style>{`
-        .mobile-menu-btn {
-          display: none !important;
-        }
-        
-        @media (max-width: 768px) {
-          .mobile-menu-btn {
-            display: block !important;
-          }
-        }
-      `}</style>
         </>
     );
 };

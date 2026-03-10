@@ -20,7 +20,6 @@ import type { PaginatedResponse, Review } from '../types';
 import { useAuth } from '../hooks/useAuth';
 
 const { Title, Text } = Typography;
-const { Search } = Input;
 
 const NewHome = () => {
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -78,34 +77,55 @@ const NewHome = () => {
     return (
         <div className="home-container">
             <div className="home-header">
+                <span className="home-kicker">HDU Dining Atlas</span>
                 <Title level={2} className="home-title">
                     杭电美食点评
                 </Title>
                 <Text type="secondary" className="home-subtitle">
-                    发现校园里的美味佳肴
+                    发现校园里的热门窗口与隐藏菜单
                 </Text>
+                {meta && (
+                    <div className="home-meta-line">
+                        <span>当前收录点评</span>
+                        <strong>{meta.total}</strong>
+                        <span>条</span>
+                    </div>
+                )}
             </div>
 
             <div className="home-search-section">
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                    <Search
-                        placeholder="搜索菜品、地点或关键词..."
-                        allowClear
-                        enterButton={<SearchOutlined />}
-                        size="large"
-                        onSearch={(value) => {
-                            setPage(1);
-                            setQuery(value);
-                        }}
-                        onChange={(e) => {
-                            setPage(1);
-                            setQuery(e.target.value);
-                        }}
-                        value={query}
-                        className="home-search-input"
-                    />
+                    <div className="home-search-bar">
+                        <Input
+                            placeholder="搜索菜品、地点或关键词..."
+                            allowClear
+                            size="large"
+                            value={query}
+                            onChange={(e) => {
+                                setPage(1);
+                                setQuery(e.target.value);
+                            }}
+                            onPressEnter={(e) => {
+                                const value = (e.target as HTMLInputElement).value;
+                                setPage(1);
+                                setQuery(value);
+                            }}
+                            className="home-search-field"
+                        />
+                        <Button
+                            type="text"
+                            icon={<SearchOutlined />}
+                            onClick={() => {
+                                setPage(1);
+                                setQuery(query);
+                            }}
+                            className="home-search-button"
+                            aria-label="搜索"
+                        />
+                    </div>
 
                     <div className="home-filters">
+                        <span className="home-filter-label">排序方式</span>
                         <Select
                             value={sort}
                             onChange={(value) => {

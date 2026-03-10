@@ -29,11 +29,10 @@
 }
 
 .home-search-input {
-    border-radius: 12px;
-    box-shadow: var(--shadow-sm);
-    background: var(--bg-primary);
+    border: none;
+    box-shadow: none;
+    background: transparent;
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
 }
 
 .home-filters {
