@@ -14,6 +14,11 @@ func main() {
 	fmt.Println("=== 管理员账户检查工具 ===")
 	fmt.Println()
 
+	// 设置默认JWT密钥用于检查（config.Load 要求该配置存在）
+	if os.Getenv("APP_AUTH_JWT_SECRET") == "" {
+		os.Setenv("APP_AUTH_JWT_SECRET", "check-admin-secret-key")
+	}
+
 	// 加载配置
 	cfg, err := config.Load()
 	if err != nil {
@@ -21,10 +26,11 @@ func main() {
 		fmt.Println("使用默认配置继续检查...")
 		cfg = &config.Config{}
 		cfg.Admin.Email = "admin@example.com"
+		cfg.Database.Driver = "sqlite"
+		cfg.Database.DSN = "file:data/app.db?_fk=1&mode=rwc"
+		cfg.Storage.Provider = "local"
+		cfg.Storage.UploadDir = "uploads"
 	}
-
-	// 设置默认JWT密钥用于检查
-	os.Setenv("APP_AUTH_JWT_SECRET", "check-admin-secret-key")
 
 	// 初始化数据库
 	db, err := database.Init(cfg)

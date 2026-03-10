@@ -1,8 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"os"
+	"strconv"
 )
 
 // EmailConfig holds email service configuration
@@ -45,8 +45,10 @@ func getEnv(key, defaultValue string) string {
 // getEnvAsInt gets environment variable as integer with default value
 func getEnvAsInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
-		var result int
-		fmt.Sscanf(value, "%d", &result)
+		result, err := strconv.Atoi(value)
+		if err != nil {
+			return defaultValue
+		}
 		return result
 	}
 	return defaultValue

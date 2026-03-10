@@ -67,19 +67,19 @@ func (m *AuthMiddleware) OptionalAuth() gin.HandlerFunc {
 
 		claims, err := m.tokens.Parse(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.Next()
 			return
 		}
 
 		userID, err := uuid.Parse(claims.UserID)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user id"})
+			c.Next()
 			return
 		}
 
 		user, err := m.users.FindByID(userID)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			c.Next()
 			return
 		}
 
@@ -103,7 +103,11 @@ func (m *AuthMiddleware) RequireRoles(roles ...string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "missing role"})
 			return
 		}
-		roleStr := role.(string)
+		roleStr, ok := role.(string)
+		if !ok || roleStr == "" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "invalid role"})
+			return
+		}
 		if _, ok := allowed[roleStr]; !ok {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("insufficient privileges: got %s, want one of %v", roleStr, roles)})
 			return

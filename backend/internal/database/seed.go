@@ -17,9 +17,9 @@ func seedAdmin(db *gorm.DB, cfg *config.Config) error {
 	}
 
 	var existing models.User
-	err := db.Where("email = ?", cfg.Admin.Email).First(&existing).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return fmt.Errorf("query admin: %w", err)
+	queryErr := db.Where("email = ?", cfg.Admin.Email).First(&existing).Error
+	if queryErr != nil && !errors.Is(queryErr, gorm.ErrRecordNotFound) {
+		return fmt.Errorf("query admin: %w", queryErr)
 	}
 
 	hashed, err := utils.HashPassword(cfg.Admin.Password)
@@ -27,7 +27,7 @@ func seedAdmin(db *gorm.DB, cfg *config.Config) error {
 		return fmt.Errorf("hash admin password: %w", err)
 	}
 
-	if err == nil {
+	if queryErr == nil {
 		needsUpdate := false
 		if existing.Role != "admin" {
 			existing.Role = "admin"

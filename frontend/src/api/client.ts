@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import type { AuthResponse, PaginatedResponse, Review, User } from '../types';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: '/api/v1'
 });
 
