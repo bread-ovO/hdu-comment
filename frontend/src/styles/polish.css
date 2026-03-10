@@ -493,8 +493,25 @@ body {
   font-weight: 700;
 }
 
+.review-card-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .review-description {
   color: var(--text-secondary);
+  min-height: 3em;
+}
+
+.review-info {
+  margin-bottom: 0;
+}
+
+.review-stats-section {
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .review-card .ant-card-actions {

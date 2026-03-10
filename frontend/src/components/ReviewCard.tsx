@@ -159,7 +159,7 @@ const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }:
                     </Space>
                 </Space>
 
-                <div style={{ marginTop: 16 }}>
+                <div className="review-stats-section">
                     <ReviewStatsDisplay reviewId={review.id} />
                 </div>
             </div>
