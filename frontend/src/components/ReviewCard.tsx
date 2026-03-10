@@ -4,7 +4,8 @@ import {
     EnvironmentOutlined,
     CalendarOutlined,
     UserOutlined,
-    EyeOutlined
+    EyeOutlined,
+    PictureOutlined
 } from '@ant-design/icons';
 import ReviewStatsDisplay from './ReviewStatsDisplay';
 import { statsApi } from '../api/stats';
@@ -20,6 +21,7 @@ interface ReviewCardProps {
 }
 
 const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }: ReviewCardProps) => {
+    const coverImage = review.images && review.images.length > 0 ? review.images[0].url : '';
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -48,12 +50,13 @@ const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }:
     };
 
     const actions = [
-        <Link to={`/reviews/${review.id}`} key="view" style={{ display: 'inline-block', width: '100%' }}>
+        <Link to={`/reviews/${review.id}`} key="view" className="review-detail-link">
             <Button
                 block
-                type="text"
+                type="default"
                 icon={<EyeOutlined />}
                 onClick={handleViewDetail}
+                className="review-detail-btn"
             >
                 查看详情
             </Button>
@@ -85,23 +88,28 @@ const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }:
             hoverable
             className="review-card"
             cover={
-                review.images && review.images.length > 0 && (
-                    <div className="review-card-image-container">
+                <div className="review-card-image-container">
+                    {coverImage ? (
                         <img
                             alt={review.title}
-                            src={review.images[0].url}
+                            src={coverImage}
                             className="review-card-image"
                         />
-                        {showStatus && (
-                            <Tag
-                                color={getStatusColor(review.status)}
-                                className="review-status-tag"
-                            >
-                                {getStatusText(review.status)}
-                            </Tag>
-                        )}
-                    </div>
-                )
+                    ) : (
+                        <div className="review-card-image-placeholder">
+                            <PictureOutlined className="review-card-image-placeholder-icon" />
+                            <span className="review-card-image-placeholder-text">暂无图片</span>
+                        </div>
+                    )}
+                    {showStatus && (
+                        <Tag
+                            color={getStatusColor(review.status)}
+                            className="review-status-tag"
+                        >
+                            {getStatusText(review.status)}
+                        </Tag>
+                    )}
+                </div>
             }
             actions={actions}
         >

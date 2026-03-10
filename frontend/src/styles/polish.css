@@ -443,14 +443,49 @@ body {
 
 .review-card-image-container {
   height: 190px;
+  background: var(--bg-tertiary);
 }
 
 .review-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 320ms ease;
 }
 
 .review-card:hover .review-card-image {
   transform: scale(1.07);
+}
+
+.review-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background:
+    radial-gradient(120px 70px at 70% 20%, rgba(15, 118, 110, 0.16), transparent 70%),
+    linear-gradient(145deg, rgba(15, 118, 110, 0.08), rgba(217, 119, 6, 0.08));
+  color: var(--text-tertiary);
+}
+
+[data-theme='dark'] .review-card-image-placeholder {
+  background:
+    radial-gradient(120px 70px at 70% 20%, rgba(110, 200, 189, 0.2), transparent 70%),
+    linear-gradient(145deg, rgba(110, 200, 189, 0.12), rgba(245, 179, 66, 0.08));
+}
+
+.review-card-image-placeholder-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+  opacity: 0.75;
+}
+
+.review-card-image-placeholder-text {
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
 }
 
 .review-title.ant-typography {
@@ -467,9 +502,45 @@ body {
   border-top: 1px solid rgba(15, 118, 110, 0.15);
 }
 
+.review-card .ant-card-actions > li {
+  background: transparent !important;
+}
+
+.review-card .ant-card-actions > li > span {
+  background: transparent !important;
+  padding: 8px 12px !important;
+}
+
 [data-theme='dark'] .review-card .ant-card-actions {
   background: rgba(110, 200, 189, 0.08);
   border-top-color: rgba(110, 200, 189, 0.2);
+}
+
+.review-detail-link {
+  display: block;
+  width: 100%;
+}
+
+.review-detail-btn.ant-btn {
+  height: 38px;
+  border-radius: 999px !important;
+  border: 1px solid rgba(15, 118, 110, 0.28) !important;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(15, 118, 110, 0.06)) !important;
+  color: var(--primary-color) !important;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+.review-detail-btn.ant-btn:hover {
+  border-color: rgba(15, 118, 110, 0.45) !important;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.22), rgba(15, 118, 110, 0.1)) !important;
+  color: var(--primary-hover) !important;
+}
+
+[data-theme='dark'] .review-detail-btn.ant-btn {
+  border-color: rgba(110, 200, 189, 0.5) !important;
+  background: linear-gradient(135deg, rgba(110, 200, 189, 0.24), rgba(110, 200, 189, 0.1)) !important;
+  color: #b5f1e8 !important;
 }
 
 .home-pagination {
