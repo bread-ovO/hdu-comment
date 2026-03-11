@@ -8,6 +8,15 @@ services:
       APP_AUTH_JWT_SECRET: "change-me"
       APP_AUTH_ACCESS_TOKEN_TTL: "15m"
       APP_AUTH_REFRESH_TOKEN_TTL: "168h"
+      # QQ OAuth (set APP_ID/SECRET before enabling)
+      APP_AUTH_QQ_ENABLED: "false"
+      APP_AUTH_QQ_APP_ID: ""
+      APP_AUTH_QQ_APP_SECRET: ""
+      APP_AUTH_QQ_REDIRECT_URI: "http://localhost:5173/login"
+      # SMS login (dev mode returns debug_code for local testing)
+      APP_AUTH_SMS_ENABLED: "true"
+      APP_AUTH_SMS_CODE_TTL: "10m"
+      APP_AUTH_SMS_DEV_MODE: "true"
       APP_STORAGE_PROVIDER: "local"
       APP_STORAGE_UPLOAD_DIR: "/app/uploads"
       APP_STORAGE_PUBLIC_BASE_URL: "/api/v1/uploads"
