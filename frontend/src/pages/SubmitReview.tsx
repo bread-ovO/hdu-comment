@@ -5,6 +5,7 @@ import { submitReview, uploadReviewImage } from '../api/client';
 import type { Review } from '../types';
 
 const { TextArea } = Input;
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const SubmitReview = () => {
   const [submitting, setSubmitting] = useState(false);
@@ -55,6 +56,11 @@ const SubmitReview = () => {
   };
 
   const handleBeforeUpload = (file: RcFile) => {
+    if (file.size > MAX_IMAGE_SIZE) {
+      message.error(`图片 ${file.name} 超过 10MB，无法上传`);
+      return Upload.LIST_IGNORE;
+    }
+
     const item: UploadFile = {
       uid: file.uid,
       name: file.name,
@@ -120,7 +126,9 @@ const SubmitReview = () => {
           <Button disabled={uploadingImages}>选择图片</Button>
         </Upload>
         <Typography.Paragraph type="secondary" style={{ marginTop: 12 }}>
-          {currentReview ? '继续选择即可立即上传图片。' : '您可以先选择图片，点评提交成功后会自动上传。'}
+          {currentReview
+            ? '继续选择即可立即上传图片（单张不超过 10MB）。'
+            : '您可以先选择图片，点评提交成功后会自动上传（单张不超过 10MB）。'}
         </Typography.Paragraph>
       </Card>
     </Card>

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, Descriptions, Form, Image, Input, Modal, Space, Table, Tag, Typography, message } from 'antd';
+import { Button, Card, Descriptions, Form, Grid, Image, Input, Modal, Space, Table, Tag, Typography, message } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { approveReview, deleteReview, fetchPendingReviews, fetchReviewDetail, rejectReview } from '../api/client';
 import type { Review } from '../types';
 
 const AdminPending = () => {
+  const screens = Grid.useBreakpoint();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<TablePaginationConfig>({ current: 1, pageSize: 10, total: 0 });
@@ -112,12 +113,14 @@ const AdminPending = () => {
     {
       title: '菜品/店铺',
       dataIndex: 'title',
-      key: 'title'
+      key: 'title',
+      ellipsis: true
     },
     {
       title: '地址',
       dataIndex: 'address',
-      key: 'address'
+      key: 'address',
+      ellipsis: true
     },
     {
       title: '评分',
@@ -135,7 +138,7 @@ const AdminPending = () => {
       title: '操作',
       key: 'actions',
       render: (_, record) => (
-        <Space>
+        <Space wrap direction={screens.xs ? 'vertical' : 'horizontal'}>
           <Button onClick={() => handleViewDetail(record)}>查看详情</Button>
           <Button type="primary" onClick={() => handleApprove(record)}>
             通过
@@ -156,7 +159,10 @@ const AdminPending = () => {
       <Card
         title={<Typography.Title level={4}>待审核点评</Typography.Title>}
         extra={
-          <Space>
+          <Space
+            direction={screens.xs ? 'vertical' : 'horizontal'}
+            style={screens.xs ? { width: '100%' } : undefined}
+          >
             <Input.Search
               placeholder="搜索"
               allowClear
@@ -164,7 +170,7 @@ const AdminPending = () => {
                 setQuery(value);
                 load(1, pagination.pageSize ?? 10, value);
               }}
-              style={{ width: 240 }}
+              style={screens.xs ? { width: '100%' } : { width: 240 }}
             />
             <Tag color="orange">共 {pagination.total ?? 0} 条待处理</Tag>
           </Space>
@@ -176,9 +182,12 @@ const AdminPending = () => {
         columns={columns}
         dataSource={reviews}
         loading={loading}
+        size={screens.xs ? 'small' : 'middle'}
+        scroll={{ x: 980 }}
         pagination={{
           ...pagination,
-          showSizeChanger: true,
+          showSizeChanger: !screens.xs,
+          simple: screens.xs,
           onChange: (page, pageSize) => load(page, pageSize)
         }}
       />
@@ -209,7 +218,7 @@ const AdminPending = () => {
           setDetailReview(null);
         }}
         footer={null}
-        width={720}
+        width={screens.xs ? 'calc(100vw - 24px)' : 720}
       >
         {detailLoading ? (
           <Typography.Paragraph>加载中...</Typography.Paragraph>
@@ -239,8 +248,8 @@ const AdminPending = () => {
                     <Image
                       key={image.id}
                       src={image.url}
-                      width={160}
-                      height={120}
+                      width={screens.xs ? 120 : 160}
+                      height={screens.xs ? 90 : 120}
                       style={{ objectFit: 'cover' }}
                     />
                   ))}

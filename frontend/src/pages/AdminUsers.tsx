@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Card, message, Popconfirm, Space, Table, Tag } from 'antd';
+import { Button, Card, Grid, message, Popconfirm, Space, Table, Tag } from 'antd';
 import type { TablePaginationConfig } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { deleteAdminUser, fetchAdminUsers } from '../api/client';
@@ -15,6 +15,7 @@ interface AdminUserTableRecord extends AdminUserRecord {
 }
 
 const AdminUsers = () => {
+  const screens = Grid.useBreakpoint();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<AdminUserTableRecord[]>([]);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -76,12 +77,14 @@ const AdminUsers = () => {
     {
       title: '邮箱',
       dataIndex: 'email',
-      key: 'email'
+      key: 'email',
+      ellipsis: true
     },
     {
       title: '昵称',
       dataIndex: 'display_name',
-      key: 'display_name'
+      key: 'display_name',
+      ellipsis: true
     },
     {
       title: '角色',
@@ -109,7 +112,7 @@ const AdminUsers = () => {
       title: '操作',
       key: 'actions',
       render: (_: unknown, record: AdminUserTableRecord) => (
-        <Space>
+        <Space wrap>
           <Popconfirm
             title="确认删除该用户？"
             okText="删除"
@@ -134,7 +137,13 @@ const AdminUsers = () => {
           columns={columns}
           dataSource={users}
           loading={loading}
-          pagination={pagination}
+          size={screens.xs ? 'small' : 'middle'}
+          scroll={{ x: 900 }}
+          pagination={{
+            ...pagination,
+            simple: screens.xs,
+            showSizeChanger: !screens.xs
+          }}
           onChange={handleTableChange}
         />
       </Card>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Alert, Card, Descriptions, Image, Space, Spin, Tag, Typography } from 'antd';
+import { Alert, Card, Descriptions, Grid, Image, Space, Spin, Tag, Typography } from 'antd';
 import { fetchReviewDetail } from '../api/client';
 import { statsApi } from '../api/stats';
 import ReactionButtons from '../components/ReactionButtons';
@@ -13,6 +13,7 @@ const statusMap: Record<Review['status'], { text: string; color: string }> = {
 };
 
 const ReviewDetail = () => {
+  const screens = Grid.useBreakpoint();
   const { id } = useParams<{ id: string }>();
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +60,7 @@ const ReviewDetail = () => {
   return (
     <Card className="subpage-card">
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <Typography.Title level={3} style={{ margin: 0 }}>
             {review.title}
           </Typography.Title>
@@ -89,8 +90,8 @@ const ReviewDetail = () => {
                 key={image.id}
                 src={image.url}
                 alt={review.title}
-                width={240}
-                height={180}
+                width={screens.xs ? 160 : 240}
+                height={screens.xs ? 120 : 180}
                 style={{ objectFit: 'cover' }}
               />
             ))}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Tag, Typography } from 'antd';
+import { Card, Grid, Table, Tag, Typography } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { fetchMyReviews } from '../api/client';
 import type { Review } from '../types';
@@ -11,6 +11,7 @@ const statusMap: Record<Review['status'], { text: string; color: string }> = {
 };
 
 const MyReviews = () => {
+  const screens = Grid.useBreakpoint();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<TablePaginationConfig>({ current: 1, pageSize: 10, total: 0 });
@@ -34,7 +35,8 @@ const MyReviews = () => {
     {
       title: '菜品/店铺',
       dataIndex: 'title',
-      key: 'title'
+      key: 'title',
+      ellipsis: true
     },
     {
       title: '状态',
@@ -52,7 +54,8 @@ const MyReviews = () => {
       title: '驳回原因',
       dataIndex: 'rejection_reason',
       key: 'rejection_reason',
-      render: (reason?: string) => reason || '-'
+      render: (reason?: string) => reason || '-',
+      ellipsis: true
     },
     {
       title: '提交时间',
@@ -70,9 +73,12 @@ const MyReviews = () => {
         columns={columns}
         dataSource={reviews}
         loading={loading}
+        size={screens.xs ? 'small' : 'middle'}
+        scroll={{ x: 820 }}
         pagination={{
           ...pagination,
-          showSizeChanger: true,
+          showSizeChanger: !screens.xs,
+          simple: screens.xs,
           onChange: (page, pageSize) => load(page, pageSize)
         }}
       />

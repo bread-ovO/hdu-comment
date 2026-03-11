@@ -172,7 +172,7 @@ const Login = () => {
             label="验证码"
             required
           >
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div className="auth-code-row">
               <Form.Item
                 name="code"
                 rules={[
@@ -187,6 +187,7 @@ const Login = () => {
                 onClick={handleSendSMSCode}
                 loading={sendingSMSCode}
                 disabled={countdown > 0}
+                className="auth-code-button"
                 style={{ minWidth: 120, flexShrink: 0 }}
               >
                 {countdown > 0 ? `${countdown}s` : '获取验证码'}
@@ -202,7 +203,7 @@ const Login = () => {
   ];
 
   return (
-    <Card style={{ maxWidth: 420, margin: '48px auto' }}>
+    <Card className="auth-card">
       <Typography.Title level={3}>登录</Typography.Title>
       {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
       <Tabs defaultActiveKey="password" items={tabItems} animated={false} destroyOnHidden />

@@ -17,6 +17,8 @@ type ReviewHandler struct {
 	reviews *services.ReviewService
 }
 
+const maxImageUploadSize = 10 * 1024 * 1024 // 10MB
+
 // NewReviewHandler constructs a ReviewHandler.
 func NewReviewHandler(reviews *services.ReviewService) *ReviewHandler {
 	return &ReviewHandler{reviews: reviews}
@@ -159,6 +161,7 @@ func (h *ReviewHandler) MyReviews(c *gin.Context) {
 // @Failure      400  {object}  object{error=string} "请求错误"
 // @Failure      403  {object}  object{error=string} "无权操作"
 // @Failure      404  {object}  object{error=string} "点评不存在"
+// @Failure      413  {object}  object{error=string} "图片过大"
 // @Failure      500  {object}  object{error=string} "服务器内部错误"
 // @Security     ApiKeyAuth
 // @Router       /reviews/{id}/images [post]
@@ -184,6 +187,10 @@ func (h *ReviewHandler) UploadImage(c *gin.Context) {
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
+		return
+	}
+	if fileHeader.Size > maxImageUploadSize {
+		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "image size must not exceed 10MB"})
 		return
 	}
 

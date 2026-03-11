@@ -4,6 +4,7 @@
     align-items: center;
     justify-content: center;
     height: calc(100vh - 80px);
+    min-height: calc(100dvh - 80px);
     /* Adjust height based on your header height */
     text-align: center;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -35,6 +36,7 @@
 @media (max-width: 768px) {
     .not-found-container {
         height: calc(100vh - 60px);
+        min-height: calc(100dvh - 60px);
         /* 调整高度适应小屏幕 */
         padding: 20px;
     }
@@ -67,6 +69,7 @@
 @media (max-width: 480px) {
     .not-found-container {
         height: calc(100vh - 50px);
+        min-height: calc(100dvh - 50px);
         padding: 15px;
     }
 
@@ -90,6 +93,7 @@
 @media (orientation: landscape) and (max-width: 768px) {
     .not-found-container {
         height: calc(100vh - 40px);
+        min-height: calc(100dvh - 40px);
         /* 横屏时减少顶部空间 */
     }
 

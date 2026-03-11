@@ -163,7 +163,7 @@ const Register = () => {
             label="验证码"
             required
           >
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div className="auth-code-row">
               <Form.Item
                 name="code"
                 rules={[
@@ -178,6 +178,7 @@ const Register = () => {
                 onClick={handleSendEmailCode}
                 disabled={emailCountdown > 0 || sendingEmailCode || loadingEmail}
                 loading={sendingEmailCode}
+                className="auth-code-button"
                 style={{ minWidth: 128, flexShrink: 0 }}
               >
                 {emailCountdown > 0 ? `${emailCountdown}s后重发` : '获取验证码'}
@@ -212,7 +213,7 @@ const Register = () => {
             label="验证码"
             required
           >
-            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <div className="auth-code-row">
               <Form.Item
                 name="code"
                 rules={[
@@ -227,6 +228,7 @@ const Register = () => {
                 onClick={handleSendSMSCode}
                 disabled={smsCountdown > 0 || sendingSMSCode || loadingPhone}
                 loading={sendingSMSCode}
+                className="auth-code-button"
                 style={{ minWidth: 128, flexShrink: 0 }}
               >
                 {smsCountdown > 0 ? `${smsCountdown}s后重发` : '获取验证码'}
@@ -245,7 +247,7 @@ const Register = () => {
   ];
 
   return (
-    <Card style={{ maxWidth: 420, margin: '48px auto' }}>
+    <Card className="auth-card">
       <Typography.Title level={3}>注册</Typography.Title>
       {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
       <Tabs defaultActiveKey="email" items={tabItems} animated={false} destroyOnHidden />

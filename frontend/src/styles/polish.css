@@ -573,6 +573,21 @@ body {
   padding: 0 12px;
 }
 
+.auth-card.ant-card {
+  max-width: 420px;
+  margin: 48px auto;
+}
+
+.auth-code-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.auth-code-button.ant-btn {
+  flex-shrink: 0;
+}
+
 .subpage-page-wide {
   max-width: 1460px;
 }
@@ -705,6 +720,27 @@ body {
 
   .review-card-image-container {
     height: 160px;
+  }
+
+  .subpage-table-card .ant-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card.ant-card {
+    margin: 20px auto;
+  }
+
+  .auth-code-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .auth-code-button.ant-btn {
+    width: 100%;
+    min-width: 0 !important;
   }
 }
 
