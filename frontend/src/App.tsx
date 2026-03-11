@@ -16,6 +16,7 @@ const MyReviews = lazy(() => import('./pages/MyReviews'));
 const ReviewDetail = lazy(() => import('./pages/ReviewDetail'));
 const AdminPending = lazy(() => import('./pages/AdminPending'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminStats = lazy(() => import('./pages/AdminStats'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const App = () => {
@@ -36,6 +37,7 @@ const App = () => {
             </Route>
 
             <Route element={<ProtectedRoute requireAdmin />}>
+              <Route path="/admin/stats" element={<AdminStats />} />
               <Route path="/admin/reviews" element={<AdminPending />} />
               <Route path="/admin/users" element={<AdminUsers />} />
             </Route>

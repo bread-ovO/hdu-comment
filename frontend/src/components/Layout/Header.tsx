@@ -13,7 +13,8 @@ import {
     HomeOutlined,
     MoonOutlined,
     SunOutlined,
-    TeamOutlined
+    TeamOutlined,
+    BarChartOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -63,6 +64,11 @@ const AppHeader = () => {
     if (user?.role === 'admin') {
         menuItems.push(
             {
+                key: '/admin/stats',
+                label: <Link to="/admin/stats">流量统计</Link>,
+                icon: <BarChartOutlined />
+            },
+            {
                 key: '/admin/users',
                 label: <Link to="/admin/users">用户管理</Link>,
                 icon: <TeamOutlined />
@@ -75,7 +81,9 @@ const AppHeader = () => {
         );
     }
 
-    const selectedKey = location.pathname.startsWith('/admin/users')
+    const selectedKey = location.pathname.startsWith('/admin/stats')
+        ? '/admin/stats'
+        : location.pathname.startsWith('/admin/users')
         ? '/admin/users'
         : location.pathname.startsWith('/admin/reviews')
             ? '/admin/reviews'
