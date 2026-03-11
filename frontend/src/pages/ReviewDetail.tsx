@@ -57,7 +57,7 @@ const ReviewDetail = () => {
   }
 
   return (
-    <Card>
+    <Card className="subpage-card">
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Typography.Title level={3} style={{ margin: 0 }}>

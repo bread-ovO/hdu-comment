@@ -127,8 +127,8 @@ const AdminUsers = () => {
   ];
 
   return (
-    <div style={{ maxWidth: 960, margin: '32px auto', padding: '0 16px' }}>
-      <Card title="用户管理">
+    <div className="subpage-page subpage-page-wide">
+      <Card title="用户管理" className="subpage-card subpage-table-card">
         <Table
           rowKey="id"
           columns={columns}

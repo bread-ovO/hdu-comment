@@ -63,7 +63,8 @@ const MyReviews = () => {
   ];
 
   return (
-    <Card title={<Typography.Title level={4}>我的点评</Typography.Title>}>
+    <div className="subpage-page">
+      <Card title={<Typography.Title level={4}>我的点评</Typography.Title>} className="subpage-card subpage-table-card">
       <Table
         rowKey="id"
         columns={columns}
@@ -75,7 +76,8 @@ const MyReviews = () => {
           onChange: (page, pageSize) => load(page, pageSize)
         }}
       />
-    </Card>
+      </Card>
+    </div>
   );
 };
 

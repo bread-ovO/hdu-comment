@@ -567,6 +567,70 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+.subpage-page {
+  max-width: 1080px;
+  margin: 28px auto;
+  padding: 0 12px;
+}
+
+.subpage-page-wide {
+  max-width: 1460px;
+}
+
+.subpage-card.ant-card {
+  background: rgba(255, 255, 255, 0.38) !important;
+  border: 1px solid rgba(128, 112, 79, 0.2) !important;
+  box-shadow: 0 16px 24px -24px rgba(50, 41, 28, 0.48) !important;
+  backdrop-filter: blur(10px);
+}
+
+[data-theme='dark'] .subpage-card.ant-card {
+  background: rgba(22, 26, 32, 0.5) !important;
+  border-color: rgba(151, 139, 115, 0.28) !important;
+}
+
+.subpage-card .ant-card-head,
+.subpage-card .ant-card-body {
+  background: transparent !important;
+}
+
+.subpage-table-card .ant-table-wrapper,
+.subpage-table-card .ant-table,
+.subpage-table-card .ant-table-container {
+  background: transparent !important;
+}
+
+.subpage-table-card .ant-table-thead > tr > th {
+  background: rgba(255, 255, 255, 0.42) !important;
+}
+
+.subpage-table-card .ant-table-tbody > tr > td {
+  background: transparent !important;
+}
+
+.subpage-table-card .ant-table-tbody > tr:hover > td {
+  background: rgba(15, 118, 110, 0.08) !important;
+}
+
+[data-theme='dark'] .subpage-table-card .ant-table-thead > tr > th {
+  background: rgba(22, 26, 32, 0.6) !important;
+}
+
+[data-theme='dark'] .subpage-table-card .ant-table-tbody > tr:hover > td {
+  background: rgba(110, 200, 189, 0.11) !important;
+}
+
+.subpage-inner-card.ant-card {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 1px dashed rgba(128, 112, 79, 0.28) !important;
+  box-shadow: none !important;
+}
+
+[data-theme='dark'] .subpage-inner-card.ant-card {
+  background: rgba(22, 26, 32, 0.32) !important;
+  border-color: rgba(151, 139, 115, 0.34) !important;
+}
+
 .ant-btn-primary {
   border-radius: 12px;
   border-color: var(--primary-color) !important;

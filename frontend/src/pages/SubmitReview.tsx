@@ -79,7 +79,7 @@ const SubmitReview = () => {
   };
 
   return (
-    <Card>
+    <Card className="subpage-card">
       <Typography.Title level={3}>提交新的食物点评</Typography.Title>
       <Form
         layout="vertical"
@@ -108,7 +108,7 @@ const SubmitReview = () => {
         </Button>
       </Form>
 
-      <Card style={{ marginTop: 24 }} size="small" title="上传图片（可选）">
+      <Card style={{ marginTop: 24 }} size="small" title="上传图片（可选）" className="subpage-inner-card">
         <Upload
           accept="image/*"
           multiple

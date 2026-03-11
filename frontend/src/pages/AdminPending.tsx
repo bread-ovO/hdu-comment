@@ -153,23 +153,25 @@ const AdminPending = () => {
   ];
 
   return (
-    <Card
-      title={<Typography.Title level={4}>待审核点评</Typography.Title>}
-      extra={
-        <Space>
-          <Input.Search
-            placeholder="搜索"
-            allowClear
-            onSearch={(value) => {
-              setQuery(value);
-              load(1, pagination.pageSize ?? 10, value);
-            }}
-            style={{ width: 240 }}
-          />
-          <Tag color="orange">共 {pagination.total ?? 0} 条待处理</Tag>
-        </Space>
-      }
-    >
+    <div className="subpage-page subpage-page-wide">
+      <Card
+        title={<Typography.Title level={4}>待审核点评</Typography.Title>}
+        extra={
+          <Space>
+            <Input.Search
+              placeholder="搜索"
+              allowClear
+              onSearch={(value) => {
+                setQuery(value);
+                load(1, pagination.pageSize ?? 10, value);
+              }}
+              style={{ width: 240 }}
+            />
+            <Tag color="orange">共 {pagination.total ?? 0} 条待处理</Tag>
+          </Space>
+        }
+        className="subpage-card subpage-table-card"
+      >
       <Table
         rowKey="id"
         columns={columns}
@@ -249,7 +251,8 @@ const AdminPending = () => {
           </Space>
         )}
       </Modal>
-    </Card>
+      </Card>
+    </div>
   );
 };
 
