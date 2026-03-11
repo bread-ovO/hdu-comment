@@ -36,16 +36,21 @@ const NotFound = () => {
       document.dispatchEvent(spaceEvent);
     };
 
-    // 为游戏容器添加触摸事件监听
-    const gameContainer = gameRef.current;
-    if (gameContainer) {
-      gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-      gameContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
-      
-      // 也支持点击事件（鼠标）
-      gameContainer.addEventListener('click', (e) => {
-        e.preventDefault();
-        const spaceEvent = new KeyboardEvent('keydown', {
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
+      const spaceEvent = new KeyboardEvent('keydown', {
+        key: ' ',
+        code: 'Space',
+        keyCode: 32,
+        which: 32,
+        bubbles: true,
+        cancelable: true
+      });
+      document.dispatchEvent(spaceEvent);
+
+      // 短暂延迟后释放按键
+      setTimeout(() => {
+        const spaceUpEvent = new KeyboardEvent('keyup', {
           key: ' ',
           code: 'Space',
           keyCode: 32,
@@ -53,27 +58,23 @@ const NotFound = () => {
           bubbles: true,
           cancelable: true
         });
-        document.dispatchEvent(spaceEvent);
-        
-        // 短暂延迟后释放按键
-        setTimeout(() => {
-          const spaceUpEvent = new KeyboardEvent('keyup', {
-            key: ' ',
-            code: 'Space',
-            keyCode: 32,
-            which: 32,
-            bubbles: true,
-            cancelable: true
-          });
-          document.dispatchEvent(spaceUpEvent);
-        }, 100);
-      });
+        document.dispatchEvent(spaceUpEvent);
+      }, 100);
+    };
+
+    // 为游戏容器添加触摸事件监听
+    const gameContainer = gameRef.current;
+    if (gameContainer) {
+      gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+      gameContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+      gameContainer.addEventListener('click', handleClick);
     }
 
     return () => {
       if (gameContainer) {
         gameContainer.removeEventListener('touchstart', handleTouchStart);
         gameContainer.removeEventListener('touchend', handleTouchEnd);
+        gameContainer.removeEventListener('click', handleClick);
       }
     };
   }, []);

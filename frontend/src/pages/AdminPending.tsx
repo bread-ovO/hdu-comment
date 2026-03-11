@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Descriptions, Form, Image, Input, Modal, Space, Table, Tag, Typography, message } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { approveReview, deleteReview, fetchPendingReviews, fetchReviewDetail, rejectReview } from '../api/client';
@@ -16,7 +16,7 @@ const AdminPending = () => {
   const [detailReview, setDetailReview] = useState<Review | null>(null);
   const [form] = Form.useForm();
 
-  const load = async (page = 1, pageSize = 10, keyword = query) => {
+  const load = useCallback(async (page = 1, pageSize = 10, keyword = query) => {
     setLoading(true);
     try {
       const data = await fetchPendingReviews({
@@ -34,12 +34,11 @@ const AdminPending = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [load]);
 
   const handleApprove = async (review: Review) => {
     try {

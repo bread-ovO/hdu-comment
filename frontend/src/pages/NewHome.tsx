@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     Input,
     Empty,
@@ -27,21 +27,22 @@ const NewHome = () => {
     const [error, setError] = useState<string>('');
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
-    const [query, setQuery] = useState('');
+    const [searchInput, setSearchInput] = useState('');
+    const [debouncedQuery, setDebouncedQuery] = useState('');
     const [sort, setSort] = useState<'created_at' | 'rating'>('created_at');
     const [meta, setMeta] = useState<PaginatedResponse<Review>['pagination'] | null>(null);
     const { user } = useAuth();
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
             const data = await fetchReviews({
                 page,
                 page_size: pageSize,
-                query: query || undefined,
+                query: debouncedQuery || undefined,
                 sort,
-                order: sort === 'rating' ? 'desc' : 'desc'
+                order: 'desc'
             });
             setReviews(data.data);
             setMeta(data.pagination);
@@ -51,12 +52,21 @@ const NewHome = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [debouncedQuery, page, pageSize, sort]);
+
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            setDebouncedQuery(searchInput.trim());
+        }, 350);
+
+        return () => {
+            window.clearTimeout(timer);
+        };
+    }, [searchInput]);
 
     useEffect(() => {
         load();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page, pageSize, sort, query]);
+    }, [load]);
 
     const handleDelete = async (review: Review) => {
         if (user?.role !== 'admin') {
@@ -100,15 +110,16 @@ const NewHome = () => {
                             placeholder="搜索菜品、地点或关键词..."
                             allowClear
                             size="large"
-                            value={query}
+                            value={searchInput}
                             onChange={(e) => {
                                 setPage(1);
-                                setQuery(e.target.value);
+                                setSearchInput(e.target.value);
                             }}
                             onPressEnter={(e) => {
-                                const value = (e.target as HTMLInputElement).value;
+                                const value = (e.target as HTMLInputElement).value.trim();
                                 setPage(1);
-                                setQuery(value);
+                                setSearchInput(value);
+                                setDebouncedQuery(value);
                             }}
                             className="home-search-field"
                         />
@@ -116,8 +127,10 @@ const NewHome = () => {
                             type="text"
                             icon={<SearchOutlined />}
                             onClick={() => {
+                                const value = searchInput.trim();
                                 setPage(1);
-                                setQuery(query);
+                                setSearchInput(value);
+                                setDebouncedQuery(value);
                             }}
                             className="home-search-button"
                             aria-label="搜索"
