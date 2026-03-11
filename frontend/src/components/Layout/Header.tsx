@@ -8,8 +8,6 @@ import {
     PlusOutlined,
     FileTextOutlined,
     AuditOutlined,
-    CalendarOutlined,
-    StarOutlined,
     HomeOutlined,
     MoonOutlined,
     SunOutlined,
@@ -33,16 +31,6 @@ const AppHeader = () => {
             key: '/',
             label: <Link to="/">首页</Link>,
             icon: <HomeOutlined />
-        },
-        {
-            key: '/popular',
-            label: <Link to="/?sort=rating">热门点评</Link>,
-            icon: <StarOutlined />
-        },
-        {
-            key: '/latest',
-            label: <Link to="/?sort=created_at">最新发布</Link>,
-            icon: <CalendarOutlined />
         }
     ];
 
@@ -91,10 +79,6 @@ const AppHeader = () => {
             ? '/submit'
             : location.pathname.startsWith('/my')
                 ? '/my'
-                : location.pathname === '/' && new URLSearchParams(location.search).get('sort') === 'rating'
-                    ? '/popular'
-                    : location.pathname === '/' && new URLSearchParams(location.search).get('sort') === 'created_at'
-                        ? '/latest'
                 : '/';
 
     const userMenuItems: MenuProps['items'] = [
