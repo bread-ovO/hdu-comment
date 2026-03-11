@@ -7,7 +7,6 @@ import SiteStats from '../components/SiteStats';
 import ReviewStatsDisplay from '../components/ReviewStatsDisplay';
 import type { PaginatedResponse, Review } from '../types';
 import { useAuth } from '../hooks/useAuth';
-import { statsApi } from '../api/stats';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -148,13 +147,6 @@ const Home = () => {
                     <Link
                       to={`/reviews/${review.id}`}
                       style={{ flex: 1 }}
-                      onClick={() => {
-                        if (review.status === 'approved') {
-                          statsApi.recordView(review.id).catch((err) => {
-                            console.error('Failed to record review view:', err);
-                          });
-                        }
-                      }}
                     >
                       <Button
                         block

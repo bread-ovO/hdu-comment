@@ -179,29 +179,16 @@ func (r *SiteStatsRepository) GetOrCreate(ctx context.Context) (*models.SiteStat
 
 // IncrementTotalViews increments the total site views
 func (r *SiteStatsRepository) IncrementTotalViews(ctx context.Context) error {
-	result := r.db.WithContext(ctx).
+	// GORM blocks UPDATE without WHERE by default, so we must target a concrete row.
+	stats, err := r.GetOrCreate(ctx)
+	if err != nil {
+		return err
+	}
+
+	return r.db.WithContext(ctx).
 		Model(&models.SiteStats{}).
-		UpdateColumn("total_views", gorm.Expr("total_views + ?", 1))
-
-	if result.Error != nil {
-		return result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		stats := &models.SiteStats{
-			TotalViews: 1,
-		}
-
-		err := r.db.WithContext(ctx).Create(stats).Error
-		if err != nil {
-			if errors.Is(err, gorm.ErrDuplicatedKey) {
-				return r.IncrementTotalViews(ctx)
-			}
-			return err
-		}
-	}
-
-	return nil
+		Where("id = ?", stats.ID).
+		UpdateColumn("total_views", gorm.Expr("total_views + ?", 1)).Error
 }
 
 // GetTotalViews gets the total site views

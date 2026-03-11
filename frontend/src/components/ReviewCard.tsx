@@ -8,7 +8,6 @@ import {
     PictureOutlined
 } from '@ant-design/icons';
 import ReviewStatsDisplay from './ReviewStatsDisplay';
-import { statsApi } from '../api/stats';
 import type { Review } from '../types';
 
 const { Title, Paragraph, Text } = Typography;
@@ -41,21 +40,12 @@ const ReviewCard = ({ review, onDelete, showStatus = false, canDelete = false }:
         }
     };
 
-    const handleViewDetail = () => {
-        if (review.status === 'approved') {
-            statsApi.recordView(review.id).catch((error) => {
-                console.error('Failed to record review view:', error);
-            });
-        }
-    };
-
     const actions = [
         <Link to={`/reviews/${review.id}`} key="view" className="review-detail-link">
             <Button
                 block
                 type="default"
                 icon={<EyeOutlined />}
-                onClick={handleViewDetail}
                 className="review-detail-btn"
             >
                 查看详情

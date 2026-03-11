@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert, Card, Descriptions, Grid, Image, Space, Spin, Tag, Typography } from 'antd';
 import { fetchReviewDetail } from '../api/client';
@@ -18,6 +18,7 @@ const ReviewDetail = () => {
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const recordedReviewID = useRef<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -48,6 +49,16 @@ const ReviewDetail = () => {
 
     load();
   }, [id]);
+
+  useEffect(() => {
+    if (!review || review.status !== 'approved') return;
+    if (recordedReviewID.current === review.id) return;
+
+    recordedReviewID.current = review.id;
+    statsApi.recordView(review.id).catch((statsError) => {
+      console.error('Failed to record review view:', statsError);
+    });
+  }, [review]);
 
   if (loading) {
     return <Spin />;
