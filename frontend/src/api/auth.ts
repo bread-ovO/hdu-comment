@@ -2,9 +2,13 @@ import type { AuthResponse, User } from '../types';
 import {
   api,
   fetchMe,
+  getQQLoginURL,
   login as loginWithClient,
+  loginByQQ,
+  loginBySMS,
   logout as logoutWithClient,
   refreshTokens,
+  sendSMSLoginCode,
   register as registerWithClient
 } from './client';
 
@@ -28,6 +32,16 @@ export interface VerifyEmailRequest {
   token: string;
 }
 
+export interface QQLoginRequest {
+  code: string;
+  state: string;
+}
+
+export interface SMSLoginRequest {
+  phone: string;
+  code: string;
+}
+
 export const authApi = {
   sendRegistrationCode: async (email: string): Promise<{ message: string }> => {
     const response = await api.post<{ message: string }>('/auth/send-code', { email });
@@ -40,6 +54,22 @@ export const authApi = {
 
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     return loginWithClient(data.email, data.password);
+  },
+
+  getQQLoginURL: async (): Promise<{ url: string; state: string }> => {
+    return getQQLoginURL();
+  },
+
+  qqLogin: async (data: QQLoginRequest): Promise<AuthResponse> => {
+    return loginByQQ(data.code, data.state);
+  },
+
+  sendSMSCode: async (phone: string): Promise<{ message: string; debug_code?: string }> => {
+    return sendSMSLoginCode(phone);
+  },
+
+  smsLogin: async (data: SMSLoginRequest): Promise<AuthResponse> => {
+    return loginBySMS(data.phone, data.code);
   },
 
   refresh: async (data: RefreshRequest): Promise<AuthResponse> => {

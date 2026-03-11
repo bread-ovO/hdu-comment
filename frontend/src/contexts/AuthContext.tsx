@@ -10,6 +10,9 @@ import {
 } from 'react';
 import {
   login as apiLogin,
+  loginByQQ as apiLoginByQQ,
+  loginBySMS as apiLoginBySMS,
+  sendSMSLoginCode as apiSendSMSLoginCode,
   register as apiRegister,
   refreshTokens,
   logout as apiLogout,
@@ -26,6 +29,9 @@ interface AuthContextValue {
   refreshToken: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithQQ: (code: string, state: string) => Promise<void>;
+  sendSMSLoginCode: (phone: string) => Promise<string | null>;
+  loginWithSMS: (phone: string, code: string) => Promise<void>;
   register: (email: string, password: string, displayName: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -164,6 +170,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     persist(auth);
   }, [persist]);
 
+  const handleLoginWithQQ = useCallback(async (code: string, state: string) => {
+    const auth = await apiLoginByQQ(code, state);
+    persist(auth);
+  }, [persist]);
+
+  const handleSendSMSLoginCode = useCallback(async (phone: string) => {
+    const response = await apiSendSMSLoginCode(phone);
+    return response.debug_code ?? null;
+  }, []);
+
+  const handleLoginWithSMS = useCallback(async (phone: string, code: string) => {
+    const auth = await apiLoginBySMS(phone, code);
+    persist(auth);
+  }, [persist]);
+
   const handleRegister = useCallback(
     async (email: string, password: string, displayName: string, code: string) => {
       const auth = await apiRegister(email, password, displayName, code);
@@ -199,10 +220,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     refreshToken,
     loading,
     login: handleLogin,
+    loginWithQQ: handleLoginWithQQ,
+    sendSMSLoginCode: handleSendSMSLoginCode,
+    loginWithSMS: handleLoginWithSMS,
     register: handleRegister,
     logout: handleLogout,
     refreshProfile
-  }), [user, token, refreshToken, loading, handleLogin, handleRegister, handleLogout, refreshProfile]);
+  }), [
+    user,
+    token,
+    refreshToken,
+    loading,
+    handleLogin,
+    handleLoginWithQQ,
+    handleSendSMSLoginCode,
+    handleLoginWithSMS,
+    handleRegister,
+    handleLogout,
+    refreshProfile
+  ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

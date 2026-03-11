@@ -53,6 +53,7 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	reviewRepo := repository.NewReviewRepository(db)
 	refreshRepo := repository.NewRefreshTokenRepository(db)
+	smsCodeRepo := repository.NewSMSCodeRepository(db)
 	emailVerificationRepo := repository.NewEmailVerificationRepository(db)
 	reviewStatsRepo := repository.NewReviewStatsRepository(db)
 	reviewReactionRepo := repository.NewReviewReactionRepository(db)
@@ -73,8 +74,28 @@ func main() {
 	}
 
 	jwtManager := auth.NewJWTManager(cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL)
+	qqOAuthService := services.NewQQOAuthService(
+		cfg.Auth.QQ.Enabled,
+		cfg.Auth.QQ.AppID,
+		cfg.Auth.QQ.AppSecret,
+		cfg.Auth.QQ.RedirectURI,
+		cfg.Auth.JWTSecret,
+	)
 
-	authService := services.NewAuthService(userRepo, jwtManager, refreshRepo, cfg.Auth.RefreshTokenTTL, cfg.Admin.Email)
+	authService := services.NewAuthService(
+		userRepo,
+		jwtManager,
+		refreshRepo,
+		smsCodeRepo,
+		qqOAuthService,
+		services.AuthServiceOptions{
+			RefreshTTL: cfg.Auth.RefreshTokenTTL,
+			SMSCodeTTL: cfg.Auth.SMS.CodeTTL,
+			SMSEnabled: cfg.Auth.SMS.Enabled,
+			SMSDevMode: cfg.Auth.SMS.DevMode,
+			AdminEmail: cfg.Admin.Email,
+		},
+	)
 	reviewService := services.NewReviewService(reviewRepo, storageProvider)
 	reviewStatsService := services.NewReviewStatsService(reviewStatsRepo, reviewReactionRepo, siteStatsRepo)
 
@@ -118,16 +139,16 @@ func main() {
 	}
 
 	router.Register(router.Params{
-		Engine:             engine,
-		AuthMiddleware:     authMiddleware,
-		AuthHandler:        authHandler,
-		UserHandler:        userHandler,
-		ReviewHandler:      reviewHandler,
-		ReviewStatsHandler: reviewStatsHandler,
+		Engine:                   engine,
+		AuthMiddleware:           authMiddleware,
+		AuthHandler:              authHandler,
+		UserHandler:              userHandler,
+		ReviewHandler:            reviewHandler,
+		ReviewStatsHandler:       reviewStatsHandler,
 		EmailVerificationHandler: emailVerificationHandler,
-		AdminHandler:       adminReviewHandler,
-		AdminUserHandler:   adminUserHandler,
-		StaticUploadDir:    staticUploads,
+		AdminHandler:             adminReviewHandler,
+		AdminUserHandler:         adminUserHandler,
+		StaticUploadDir:          staticUploads,
 	})
 
 	if err := engine.Run(":" + cfg.Server.Port); err != nil {

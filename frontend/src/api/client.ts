@@ -101,6 +101,28 @@ export const login = async (email: string, password: string): Promise<AuthRespon
   return data;
 };
 
+export const getQQLoginURL = async (): Promise<{ url: string; state: string }> => {
+  const { data } = await rawApi.get<{ url: string; state: string }>('/auth/qq/url');
+  return data;
+};
+
+export const loginByQQ = async (code: string, state: string): Promise<AuthResponse> => {
+  const { data } = await rawApi.post<AuthResponse>('/auth/qq/login', { code, state });
+  return data;
+};
+
+export const sendSMSLoginCode = async (
+  phone: string
+): Promise<{ message: string; debug_code?: string }> => {
+  const { data } = await rawApi.post<{ message: string; debug_code?: string }>('/auth/sms/send-code', { phone });
+  return data;
+};
+
+export const loginBySMS = async (phone: string, code: string): Promise<AuthResponse> => {
+  const { data } = await rawApi.post<AuthResponse>('/auth/sms/login', { phone, code });
+  return data;
+};
+
 export const refreshTokens = async (token: string): Promise<AuthResponse> => {
   const { data } = await rawApi.post<AuthResponse>('/auth/refresh', { refresh_token: token });
   return data;

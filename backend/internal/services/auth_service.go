@@ -2,9 +2,14 @@ package services
 
 import (
 	"crypto/rand"
+	"crypto/sha1"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
+	"math/big"
+	"regexp"
 	"strings"
 	"time"
 
@@ -29,14 +34,48 @@ type AuthService struct {
 	users         *repository.UserRepository
 	tokens        *auth.JWTManager
 	refreshTokens *repository.RefreshTokenRepository
+	smsCodes      *repository.SMSCodeRepository
+	qqOAuth       *QQOAuthService
 	refreshTTL    time.Duration
+	smsCodeTTL    time.Duration
+	smsEnabled    bool
+	smsDevMode    bool
 	adminEmail    string
 }
 
+// AuthServiceOptions groups options for AuthService initialization.
+type AuthServiceOptions struct {
+	RefreshTTL time.Duration
+	SMSCodeTTL time.Duration
+	SMSEnabled bool
+	SMSDevMode bool
+	AdminEmail string
+}
+
 // NewAuthService constructs an auth service instance.
-func NewAuthService(users *repository.UserRepository, tokens *auth.JWTManager, refreshRepo *repository.RefreshTokenRepository, refreshTTL time.Duration, adminEmail string) *AuthService {
-	adminEmail = strings.TrimSpace(strings.ToLower(adminEmail))
-	return &AuthService{users: users, tokens: tokens, refreshTokens: refreshRepo, refreshTTL: refreshTTL, adminEmail: adminEmail}
+func NewAuthService(
+	users *repository.UserRepository,
+	tokens *auth.JWTManager,
+	refreshRepo *repository.RefreshTokenRepository,
+	smsCodeRepo *repository.SMSCodeRepository,
+	qqOAuth *QQOAuthService,
+	options AuthServiceOptions,
+) *AuthService {
+	if options.SMSCodeTTL <= 0 {
+		options.SMSCodeTTL = 10 * time.Minute
+	}
+	return &AuthService{
+		users:         users,
+		tokens:        tokens,
+		refreshTokens: refreshRepo,
+		smsCodes:      smsCodeRepo,
+		qqOAuth:       qqOAuth,
+		refreshTTL:    options.RefreshTTL,
+		smsCodeTTL:    options.SMSCodeTTL,
+		smsEnabled:    options.SMSEnabled,
+		smsDevMode:    options.SMSDevMode,
+		adminEmail:    strings.TrimSpace(strings.ToLower(options.AdminEmail)),
+	}
 }
 
 // Register creates a new user account and issues token pair.
@@ -88,6 +127,164 @@ func (s *AuthService) Login(email, password string) (*AuthResult, error) {
 
 	if err := utils.CheckPassword(user.PasswordHash, password); err != nil {
 		return nil, common.ErrInvalidCredentials
+	}
+
+	return s.issueTokens(user)
+}
+
+// GetQQLoginURL builds QQ oauth authorize URL.
+func (s *AuthService) GetQQLoginURL() (string, string, error) {
+	if s.qqOAuth == nil || !s.qqOAuth.IsEnabled() {
+		return "", "", common.ErrQQServiceUnavailable
+	}
+	return s.qqOAuth.BuildAuthURL()
+}
+
+// LoginWithQQ authenticates/creates account using QQ oauth code.
+func (s *AuthService) LoginWithQQ(code, state string) (*AuthResult, error) {
+	if s.qqOAuth == nil || !s.qqOAuth.IsEnabled() {
+		return nil, common.ErrQQServiceUnavailable
+	}
+
+	profile, err := s.qqOAuth.ExchangeCode(code, state)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.users.FindByQQOpenID(profile.OpenID)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+
+		passwordHash, err := s.hashRandomPassword()
+		if err != nil {
+			return nil, err
+		}
+
+		displayName := strings.TrimSpace(profile.Nickname)
+		if displayName == "" {
+			displayName = "QQ用户" + shortSuffix(profile.OpenID)
+		}
+
+		openIDCopy := profile.OpenID
+		user = &models.User{
+			ID:           uuid.New(),
+			Email:        virtualEmail("qq", profile.OpenID),
+			QQOpenID:     &openIDCopy,
+			PasswordHash: passwordHash,
+			DisplayName:  displayName,
+			Role:         "user",
+		}
+
+		if err := s.users.Create(user); err != nil {
+			return nil, err
+		}
+	}
+
+	return s.issueTokens(user)
+}
+
+// SendSMSLoginCode creates and stores one-time login code.
+func (s *AuthService) SendSMSLoginCode(phone string) (string, error) {
+	if !s.smsEnabled || s.smsCodes == nil {
+		return "", common.ErrSMSServiceUnavailable
+	}
+	if !s.smsDevMode {
+		return "", common.ErrSMSServiceUnavailable
+	}
+
+	normalized, err := normalizeChinaPhone(phone)
+	if err != nil {
+		return "", err
+	}
+
+	code, err := generateSMSNumericCode(6)
+	if err != nil {
+		return "", err
+	}
+
+	codeHash, err := utils.HashPassword(code)
+	if err != nil {
+		return "", err
+	}
+
+	if err := s.smsCodes.DeleteByPhonePurpose(normalized, smsCodePurposeLogin); err != nil {
+		return "", err
+	}
+
+	record := &models.SMSCode{
+		ID:        uuid.New(),
+		Phone:     normalized,
+		Purpose:   smsCodePurposeLogin,
+		CodeHash:  codeHash,
+		ExpiresAt: time.Now().Add(s.smsCodeTTL),
+	}
+	if err := s.smsCodes.Create(record); err != nil {
+		return "", err
+	}
+	_ = s.smsCodes.DeleteExpired(time.Now())
+
+	log.Printf("[sms-dev] login code for %s: %s", normalized, code)
+	return code, nil
+}
+
+// LoginWithSMS verifies code and returns token pair.
+func (s *AuthService) LoginWithSMS(phone, code string) (*AuthResult, error) {
+	if !s.smsEnabled || s.smsCodes == nil {
+		return nil, common.ErrSMSServiceUnavailable
+	}
+
+	normalized, err := normalizeChinaPhone(phone)
+	if err != nil {
+		return nil, err
+	}
+
+	code = strings.TrimSpace(code)
+	if !numericCodePattern.MatchString(code) {
+		return nil, common.ErrInvalidSMSCode
+	}
+
+	record, err := s.smsCodes.FindLatestActive(normalized, smsCodePurposeLogin, time.Now())
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, common.ErrInvalidSMSCode
+		}
+		return nil, err
+	}
+
+	if err := utils.CheckPassword(record.CodeHash, code); err != nil {
+		return nil, common.ErrInvalidSMSCode
+	}
+
+	if err := s.smsCodes.MarkUsed(record.ID); err != nil {
+		return nil, err
+	}
+	_ = s.smsCodes.DeleteExpired(time.Now())
+
+	user, err := s.users.FindByPhone(normalized)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+
+		passwordHash, err := s.hashRandomPassword()
+		if err != nil {
+			return nil, err
+		}
+
+		phoneCopy := normalized
+		user = &models.User{
+			ID:           uuid.New(),
+			Email:        virtualEmail("phone", normalized),
+			Phone:        &phoneCopy,
+			PasswordHash: passwordHash,
+			DisplayName:  "手机用户" + shortSuffix(normalized),
+			Role:         "user",
+		}
+		if err := s.users.Create(user); err != nil {
+			return nil, err
+		}
 	}
 
 	return s.issueTokens(user)
@@ -226,4 +423,66 @@ func parseRefreshToken(token string) (uuid.UUID, string, error) {
 		return uuid.Nil, "", errors.New("invalid token secret")
 	}
 	return tokenID, parts[1], nil
+}
+
+const smsCodePurposeLogin = "login"
+
+var numericCodePattern = regexp.MustCompile(`^\d{6}$`)
+var chinaPhonePattern = regexp.MustCompile(`^1[3-9]\d{9}$`)
+
+func normalizeChinaPhone(phone string) (string, error) {
+	phone = strings.TrimSpace(phone)
+	phone = strings.ReplaceAll(phone, " ", "")
+	phone = strings.ReplaceAll(phone, "-", "")
+
+	if strings.HasPrefix(phone, "+86") {
+		phone = strings.TrimPrefix(phone, "+86")
+	}
+	if strings.HasPrefix(phone, "86") && len(phone) == 13 {
+		phone = strings.TrimPrefix(phone, "86")
+	}
+
+	if !chinaPhonePattern.MatchString(phone) {
+		return "", common.ErrInvalidPhoneNumber
+	}
+	return phone, nil
+}
+
+func generateSMSNumericCode(digits int) (string, error) {
+	if digits <= 0 {
+		return "", errors.New("invalid code length")
+	}
+
+	max := big.NewInt(1)
+	for i := 0; i < digits; i++ {
+		max.Mul(max, big.NewInt(10))
+	}
+
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%0*d", digits, n.Int64()), nil
+}
+
+func (s *AuthService) hashRandomPassword() (string, error) {
+	secret, err := randomSecret()
+	if err != nil {
+		return "", err
+	}
+	return utils.HashPassword(secret)
+}
+
+func virtualEmail(kind, raw string) string {
+	sum := sha1.Sum([]byte(kind + ":" + raw))
+	return fmt.Sprintf("%s_%s@local.invalid", kind, hex.EncodeToString(sum[:12]))
+}
+
+func shortSuffix(value string) string {
+	value = strings.TrimSpace(value)
+	if len(value) <= 4 {
+		return value
+	}
+	return value[len(value)-4:]
 }

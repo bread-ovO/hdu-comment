@@ -9,16 +9,18 @@ import (
 
 // User represents an application account.
 type User struct {
-	ID           uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
-	Email        string    `gorm:"uniqueIndex;size:255;not null" json:"email"`
-	PasswordHash string    `gorm:"size:255;not null" json:"-"`
-	DisplayName  string    `gorm:"size:100;not null" json:"display_name"`
-	Role         string    `gorm:"size:20;default:user" json:"role"`
-	EmailVerified bool      `gorm:"default:false" json:"email_verified"`
+	ID              uuid.UUID  `gorm:"type:char(36);primaryKey" json:"id"`
+	Email           string     `gorm:"uniqueIndex;size:255;not null" json:"email"`
+	Phone           *string    `gorm:"size:32;uniqueIndex" json:"phone,omitempty"`
+	QQOpenID        *string    `gorm:"size:64;uniqueIndex" json:"qq_open_id,omitempty"`
+	PasswordHash    string     `gorm:"size:255;not null" json:"-"`
+	DisplayName     string     `gorm:"size:100;not null" json:"display_name"`
+	Role            string     `gorm:"size:20;default:user" json:"role"`
+	EmailVerified   bool       `gorm:"default:false" json:"email_verified"`
 	EmailVerifiedAt *time.Time `json:"email_verified_at"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	Reviews      []Review  `gorm:"foreignKey:AuthorID" json:"-"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	Reviews         []Review   `gorm:"foreignKey:AuthorID" json:"-"`
 }
 
 // BeforeCreate hook to set UUIDs automatically.

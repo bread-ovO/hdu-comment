@@ -22,6 +22,17 @@ type Config struct {
 		JWTSecret       string
 		AccessTokenTTL  time.Duration
 		RefreshTokenTTL time.Duration
+		QQ              struct {
+			Enabled     bool
+			AppID       string
+			AppSecret   string
+			RedirectURI string
+		}
+		SMS struct {
+			Enabled bool
+			CodeTTL time.Duration
+			DevMode bool
+		}
 	}
 	Storage struct {
 		Provider      string
@@ -60,6 +71,11 @@ func Load() (*Config, error) {
 
 	v.SetDefault("AUTH_ACCESS_TOKEN_TTL", "15m")
 	v.SetDefault("AUTH_REFRESH_TOKEN_TTL", "168h")
+	v.SetDefault("AUTH_QQ_ENABLED", false)
+	v.SetDefault("AUTH_QQ_REDIRECT_URI", "http://localhost:5173/login")
+	v.SetDefault("AUTH_SMS_ENABLED", false)
+	v.SetDefault("AUTH_SMS_CODE_TTL", "10m")
+	v.SetDefault("AUTH_SMS_DEV_MODE", true)
 
 	v.SetDefault("STORAGE_PROVIDER", "local")
 	v.SetDefault("STORAGE_UPLOAD_DIR", "uploads")
@@ -84,6 +100,11 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("invalid REFRESH_TOKEN ttl: %w", err)
 	}
 
+	smsCodeTTL, err := time.ParseDuration(v.GetString("AUTH_SMS_CODE_TTL"))
+	if err != nil {
+		return nil, fmt.Errorf("invalid SMS_CODE ttl: %w", err)
+	}
+
 	cfg := &Config{}
 	cfg.Server.Port = v.GetString("SERVER_PORT")
 	cfg.Server.Mode = v.GetString("SERVER_MODE")
@@ -94,6 +115,13 @@ func Load() (*Config, error) {
 	cfg.Auth.JWTSecret = v.GetString("AUTH_JWT_SECRET")
 	cfg.Auth.AccessTokenTTL = accessTTL
 	cfg.Auth.RefreshTokenTTL = refreshTTL
+	cfg.Auth.QQ.Enabled = v.GetBool("AUTH_QQ_ENABLED")
+	cfg.Auth.QQ.AppID = strings.TrimSpace(v.GetString("AUTH_QQ_APP_ID"))
+	cfg.Auth.QQ.AppSecret = strings.TrimSpace(v.GetString("AUTH_QQ_APP_SECRET"))
+	cfg.Auth.QQ.RedirectURI = strings.TrimSpace(v.GetString("AUTH_QQ_REDIRECT_URI"))
+	cfg.Auth.SMS.Enabled = v.GetBool("AUTH_SMS_ENABLED")
+	cfg.Auth.SMS.CodeTTL = smsCodeTTL
+	cfg.Auth.SMS.DevMode = v.GetBool("AUTH_SMS_DEV_MODE")
 
 	cfg.Storage.Provider = v.GetString("STORAGE_PROVIDER")
 	cfg.Storage.UploadDir = v.GetString("STORAGE_UPLOAD_DIR")
@@ -112,6 +140,12 @@ func Load() (*Config, error) {
 
 	if cfg.Auth.JWTSecret == "" {
 		return nil, fmt.Errorf("missing auth jwt secret: set APP_AUTH_JWT_SECRET")
+	}
+
+	if cfg.Auth.QQ.Enabled {
+		if cfg.Auth.QQ.AppID == "" || cfg.Auth.QQ.AppSecret == "" || cfg.Auth.QQ.RedirectURI == "" {
+			return nil, fmt.Errorf("qq login enabled but APP_AUTH_QQ_APP_ID/APP_AUTH_QQ_APP_SECRET/APP_AUTH_QQ_REDIRECT_URI not fully set")
+		}
 	}
 
 	return cfg, nil

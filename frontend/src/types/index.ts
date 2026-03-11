@@ -1,6 +1,8 @@
 export interface User {
   id: string;
   email: string;
+  phone?: string | null;
+  qq_open_id?: string | null;
   display_name: string;
   role: 'user' | 'admin';
   email_verified: boolean;

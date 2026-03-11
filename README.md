@@ -65,7 +65,7 @@ docker compose down
 ```
 
 ## 核心功能
-- **用户管理**：注册、登录、个人信息查询。注册成功自动获取登录态（JWT）。
+- **用户管理**：邮箱注册登录、QQ OAuth 登录、手机短信验证码登录、个人信息查询。注册成功自动获取登录态（JWT）。
 - **点评提交**：上传食物名称、地址、描述、评分；支持追加图片，可配置本地文件或 S3/OSS/COS 等对象存储。
 - **审核流程**：管理员查看待审核点评，支持通过或驳回并记录原因。普通用户仅能查看已审核内容和自己的历史提交。
 - **公开浏览**：无需登录即可浏览已审核点评详情及图片；支持分页、关键字搜索及按评分/时间排序。
@@ -76,6 +76,11 @@ docker compose down
 - `APP_DATABASE_DSN`：数据库 DSN，默认 `file:data/app.db?_fk=1&mode=rwc`
 - `APP_AUTH_JWT_SECRET`：JWT 密钥（必填）
 - `APP_AUTH_REFRESH_TOKEN_TTL`：刷新令牌有效期，默认 `168h`
+- `APP_AUTH_QQ_ENABLED`：是否启用 QQ 登录（默认 `false`）
+- `APP_AUTH_QQ_APP_ID` / `APP_AUTH_QQ_APP_SECRET` / `APP_AUTH_QQ_REDIRECT_URI`：QQ OAuth 配置（启用 QQ 登录时必填）
+- `APP_AUTH_SMS_ENABLED`：是否启用短信登录（默认 `false`）
+- `APP_AUTH_SMS_CODE_TTL`：短信验证码有效期（默认 `10m`）
+- `APP_AUTH_SMS_DEV_MODE`：短信开发模式（默认 `true`，验证码会写入后端日志并通过接口 `debug_code` 返回）
 - `APP_STORAGE_PROVIDER`：存储类型，`local`（默认）或 `s3`
   - Local 模式：
     - `APP_STORAGE_UPLOAD_DIR`：图片物理存储目录，默认 `uploads`

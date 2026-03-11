@@ -47,12 +47,14 @@ func (h *UserHandler) Me(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id":           user.ID,
-		"email":        user.Email,
-		"display_name": user.DisplayName,
-		"role":         user.Role,
-		"email_verified":   user.EmailVerified,
+		"id":                user.ID,
+		"email":             user.Email,
+		"phone":             user.Phone,
+		"qq_open_id":        user.QQOpenID,
+		"display_name":      user.DisplayName,
+		"role":              user.Role,
+		"email_verified":    user.EmailVerified,
 		"email_verified_at": user.EmailVerifiedAt,
-		"created_at":   user.CreatedAt,
+		"created_at":        user.CreatedAt,
 	})
 }

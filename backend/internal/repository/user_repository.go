@@ -30,6 +30,24 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
+// FindByPhone fetches a user by phone.
+func (r *UserRepository) FindByPhone(phone string) (*models.User, error) {
+	var user models.User
+	if err := r.db.Where("phone = ?", phone).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// FindByQQOpenID fetches a user by QQ openid.
+func (r *UserRepository) FindByQQOpenID(openID string) (*models.User, error) {
+	var user models.User
+	if err := r.db.Where("qq_open_id = ?", openID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // FindByID fetches a user by primary key.
 func (r *UserRepository) FindByID(id uuid.UUID) (*models.User, error) {
 	var user models.User

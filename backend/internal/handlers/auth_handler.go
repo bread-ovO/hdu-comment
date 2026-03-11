@@ -127,6 +127,112 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	respondAuthSuccess(c, http.StatusOK, result)
 }
 
+// QQAuthURL returns a QQ oauth authorize URL.
+func (h *AuthHandler) QQAuthURL(c *gin.Context) {
+	url, state, err := h.authService.GetQQLoginURL()
+	if err != nil {
+		switch err {
+		case common.ErrQQServiceUnavailable:
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "QQ 登录暂不可用"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "生成 QQ 登录链接失败"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"url":   url,
+		"state": state,
+	})
+}
+
+// QQLogin handles login with QQ oauth code.
+func (h *AuthHandler) QQLogin(c *gin.Context) {
+	var req struct {
+		Code  string `json:"code"`
+		State string `json:"state"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	result, err := h.authService.LoginWithQQ(req.Code, req.State)
+	if err != nil {
+		switch err {
+		case common.ErrQQServiceUnavailable:
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "QQ 登录暂不可用"})
+		case common.ErrInvalidQQState:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "QQ 登录态已失效，请重试"})
+		default:
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "QQ 登录失败"})
+		}
+		return
+	}
+
+	respondAuthSuccess(c, http.StatusOK, result)
+}
+
+// SendSMSCode sends login verification code to a phone number.
+func (h *AuthHandler) SendSMSCode(c *gin.Context) {
+	var req struct {
+		Phone string `json:"phone"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	code, err := h.authService.SendSMSLoginCode(req.Phone)
+	if err != nil {
+		switch err {
+		case common.ErrInvalidPhoneNumber:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "手机号格式不正确"})
+		case common.ErrSMSServiceUnavailable:
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "短信登录暂不可用"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "发送短信验证码失败"})
+		}
+		return
+	}
+
+	resp := gin.H{"message": "验证码已发送"}
+	if code != "" {
+		resp["debug_code"] = code
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// SMSLogin logs in user by phone and sms code.
+func (h *AuthHandler) SMSLogin(c *gin.Context) {
+	var req struct {
+		Phone string `json:"phone"`
+		Code  string `json:"code"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	result, err := h.authService.LoginWithSMS(req.Phone, req.Code)
+	if err != nil {
+		switch err {
+		case common.ErrInvalidPhoneNumber:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "手机号格式不正确"})
+		case common.ErrInvalidSMSCode:
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "验证码错误或已过期"})
+		case common.ErrSMSServiceUnavailable:
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "短信登录暂不可用"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "短信登录失败"})
+		}
+		return
+	}
+
+	respondAuthSuccess(c, http.StatusOK, result)
+}
+
 // @Summary      刷新令牌
 // @Description  使用有效的刷新令牌获取新的访问令牌和刷新令牌。
 // @Tags         认证
@@ -197,13 +303,15 @@ func respondAuthSuccess(c *gin.Context, status int, result *services.AuthResult)
 		"access_token":  result.AccessToken,
 		"refresh_token": result.RefreshToken,
 		"user": gin.H{
-			"id":               result.User.ID,
-			"email":            result.User.Email,
-			"display_name":     result.User.DisplayName,
-			"role":             result.User.Role,
-			"email_verified":   result.User.EmailVerified,
+			"id":                result.User.ID,
+			"email":             result.User.Email,
+			"phone":             result.User.Phone,
+			"qq_open_id":        result.User.QQOpenID,
+			"display_name":      result.User.DisplayName,
+			"role":              result.User.Role,
+			"email_verified":    result.User.EmailVerified,
 			"email_verified_at": result.User.EmailVerifiedAt,
-			"created_at":       result.User.CreatedAt,
+			"created_at":        result.User.CreatedAt,
 		},
 	})
 }
