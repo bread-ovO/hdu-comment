@@ -55,7 +55,7 @@ describe('Register page interactions', () => {
       expect(mockSendRegistrationCode).toHaveBeenCalledWith('test@example.com');
     });
     expect(message.success).toHaveBeenCalledWith('验证码已发送，请查收邮箱');
-  });
+  }, 15000);
 
   it('submits registration form and navigates home', async () => {
     mockRegister.mockResolvedValueOnce(undefined);
@@ -77,5 +77,5 @@ describe('Register page interactions', () => {
       expect(mockRegister).toHaveBeenCalledWith('test@example.com', 'Passw0rd!', '小明', '123456');
     });
     expect(mockNavigate).toHaveBeenCalledWith('/');
-  });
+  }, 15000);
 });

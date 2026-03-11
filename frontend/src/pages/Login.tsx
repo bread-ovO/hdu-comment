@@ -170,26 +170,28 @@ const Login = () => {
           </Form.Item>
           <Form.Item
             label="验证码"
-            name="code"
-            rules={[
-              { required: true, message: '请输入验证码' },
-              { len: 6, message: '验证码为 6 位数字' }
-            ]}
+            required
           >
-            <Input
-              placeholder="请输入短信验证码"
-              addonAfter={(
-                <Button
-                  type="link"
-                  onClick={handleSendSMSCode}
-                  loading={sendingSMSCode}
-                  disabled={countdown > 0}
-                  style={{ paddingInline: 0 }}
-                >
-                  {countdown > 0 ? `${countdown}s` : '获取验证码'}
-                </Button>
-              )}
-            />
+            <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+              <Form.Item
+                name="code"
+                rules={[
+                  { required: true, message: '请输入验证码' },
+                  { len: 6, message: '验证码为 6 位数字' }
+                ]}
+                style={{ flex: 1, marginBottom: 0 }}
+              >
+                <Input placeholder="请输入短信验证码" maxLength={6} />
+              </Form.Item>
+              <Button
+                onClick={handleSendSMSCode}
+                loading={sendingSMSCode}
+                disabled={countdown > 0}
+                style={{ minWidth: 120, flexShrink: 0 }}
+              >
+                {countdown > 0 ? `${countdown}s` : '获取验证码'}
+              </Button>
+            </div>
           </Form.Item>
           <Button type="primary" htmlType="submit" block loading={loadingSMS}>
             登录
@@ -203,8 +205,14 @@ const Login = () => {
     <Card style={{ maxWidth: 420, margin: '48px auto' }}>
       <Typography.Title level={3}>登录</Typography.Title>
       {error && <Alert type="error" message={error} style={{ marginBottom: 16 }} />}
-      <Tabs defaultActiveKey="password" items={tabItems} />
-      <Button icon={<QqOutlined />} block onClick={handleQQEntry} loading={loadingQQ}>
+      <Tabs defaultActiveKey="password" items={tabItems} animated={false} destroyOnHidden />
+      <Button
+        icon={<QqOutlined />}
+        block
+        onClick={handleQQEntry}
+        loading={loadingQQ}
+        style={{ marginTop: 14 }}
+      >
         QQ 一键登录
       </Button>
       <Typography.Paragraph style={{ marginTop: 16 }}>
