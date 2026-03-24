@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/hdu-dp/backend/internal/auth"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/repository"
 )
 
@@ -27,25 +28,29 @@ func (m *AuthMiddleware) RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := extractBearer(c.GetHeader("Authorization"))
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing token"})
+			c.Abort()
+			httpx.Error(c, http.StatusUnauthorized, "missing token")
 			return
 		}
 
 		claims, err := m.tokens.Parse(token)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
+			c.Abort()
+			httpx.Error(c, http.StatusUnauthorized, "invalid token")
 			return
 		}
 
 		userID, err := uuid.Parse(claims.UserID)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user id"})
+			c.Abort()
+			httpx.Error(c, http.StatusUnauthorized, "invalid user id")
 			return
 		}
 
 		user, err := m.users.FindByID(userID)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			c.Abort()
+			httpx.Error(c, http.StatusUnauthorized, "user not found")
 			return
 		}
 
@@ -100,16 +105,19 @@ func (m *AuthMiddleware) RequireRoles(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, ok := c.Get("role")
 		if !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "missing role"})
+			c.Abort()
+			httpx.Error(c, http.StatusForbidden, "missing role")
 			return
 		}
 		roleStr, ok := role.(string)
 		if !ok || roleStr == "" {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "invalid role"})
+			c.Abort()
+			httpx.Error(c, http.StatusForbidden, "invalid role")
 			return
 		}
 		if _, ok := allowed[roleStr]; !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": fmt.Sprintf("insufficient privileges: got %s, want one of %v", roleStr, roles)})
+			c.Abort()
+			httpx.Error(c, http.StatusForbidden, fmt.Sprintf("insufficient privileges: got %s, want one of %v", roleStr, roles))
 			return
 		}
 		c.Next()

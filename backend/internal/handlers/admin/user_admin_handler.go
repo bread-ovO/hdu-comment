@@ -3,10 +3,9 @@ package admin
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/repository"
 	"gorm.io/gorm"
 )
@@ -23,30 +22,20 @@ func NewUserAdminHandler(users *repository.UserRepository) *UserAdminHandler {
 
 // List returns paginated users for admin view.
 func (h *UserAdminHandler) List(c *gin.Context) {
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
-	if err != nil || page < 1 {
-		page = 1
-	}
-
-	pageSize, err := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-	if err != nil || pageSize <= 0 {
-		pageSize = 20
-	}
-	if pageSize > 100 {
-		pageSize = 100
-	}
+	page := httpx.QueryInt(c, "page", 1, 1, 0)
+	pageSize := httpx.QueryInt(c, "page_size", 20, 1, 100)
 
 	offset := (page - 1) * pageSize
 
 	users, err := h.users.List(offset, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户列表失败"})
+		httpx.Error(c, http.StatusInternalServerError, "获取用户列表失败")
 		return
 	}
 
 	total, err := h.users.Count()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户总数失败"})
+		httpx.Error(c, http.StatusInternalServerError, "获取用户总数失败")
 		return
 	}
 
@@ -75,30 +64,31 @@ func (h *UserAdminHandler) List(c *gin.Context) {
 
 // Delete removes a user by id.
 func (h *UserAdminHandler) Delete(c *gin.Context) {
-	userIDParam := c.Param("id")
-	userID, err := uuid.Parse(userIDParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的用户ID"})
+	userID, ok := httpx.ParamUUID(c, "id", "无效的用户ID")
+	if !ok {
 		return
 	}
 
-	currentUserID := c.MustGet("user_id").(uuid.UUID)
+	currentUserID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
+	if !ok {
+		return
+	}
 	if currentUserID == userID {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "不能删除当前登录的账户"})
+		httpx.Error(c, http.StatusBadRequest, "不能删除当前登录的账户")
 		return
 	}
 
 	if _, err := h.users.FindByID(userID); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+			httpx.Error(c, http.StatusNotFound, "用户不存在")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询用户失败"})
+		httpx.Error(c, http.StatusInternalServerError, "查询用户失败")
 		return
 	}
 
 	if err := h.users.Delete(userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除用户失败"})
+		httpx.Error(c, http.StatusInternalServerError, "删除用户失败")
 		return
 	}
 

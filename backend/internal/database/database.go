@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,7 +58,7 @@ func Init(cfg *config.Config) (*gorm.DB, error) {
 		}
 	}
 
-	log.Printf("database initialised with driver %s", cfg.Database.Driver)
+	slog.Info("database initialised", slog.String("driver", cfg.Database.Driver))
 	return db, nil
 }
 

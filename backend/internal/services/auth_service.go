@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"math/big"
 	"regexp"
 	"strings"
@@ -225,7 +225,10 @@ func (s *AuthService) SendSMSLoginCode(phone string) (string, error) {
 	}
 	_ = s.smsCodes.DeleteExpired(time.Now())
 
-	log.Printf("[sms-dev] login code for %s: %s", normalized, code)
+	slog.Info("sms dev code generated",
+		slog.String("phone", normalized),
+		slog.String("code", code),
+	)
 	return code, nil
 }
 

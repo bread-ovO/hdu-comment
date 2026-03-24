@@ -2,11 +2,10 @@ package admin
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/services"
 )
 
@@ -35,8 +34,8 @@ func NewReviewAdminHandler(reviews *services.ReviewService) *ReviewAdminHandler 
 // @Router       /admin/reviews/pending [get]
 func (h *ReviewAdminHandler) Pending(c *gin.Context) {
 	filters := services.ListFilters{
-		Page:     mustAtoi(c.DefaultQuery("page", "1")),
-		PageSize: mustAtoi(c.DefaultQuery("page_size", "10")),
+		Page:     httpx.QueryInt(c, "page", 1, 1, 0),
+		PageSize: httpx.QueryInt(c, "page_size", 10, 1, 100),
 		Query:    strings.TrimSpace(c.Query("query")),
 		SortBy:   c.DefaultQuery("sort", "created_at"),
 		SortDir:  c.DefaultQuery("order", "desc"),
@@ -44,7 +43,7 @@ func (h *ReviewAdminHandler) Pending(c *gin.Context) {
 
 	result, err := h.reviews.ListPending(filters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -61,20 +60,19 @@ func (h *ReviewAdminHandler) Pending(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /admin/reviews/{id}/approve [put]
 func (h *ReviewAdminHandler) Approve(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	id, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	review, err := h.reviews.Get(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "review not found"})
+		httpx.Error(c, http.StatusNotFound, "review not found")
 		return
 	}
 
 	if err := h.reviews.Approve(review); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -94,28 +92,26 @@ func (h *ReviewAdminHandler) Approve(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /admin/reviews/{id}/reject [put]
 func (h *ReviewAdminHandler) Reject(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	id, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	review, err := h.reviews.Get(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "review not found"})
+		httpx.Error(c, http.StatusNotFound, "review not found")
 		return
 	}
 
 	var req struct {
-		Reason string `json:"reason"`
+		Reason string `json:"reason" binding:"required,max=500"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "请输入驳回原因") {
 		return
 	}
 
 	if err := h.reviews.Reject(review, req.Reason); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -134,27 +130,21 @@ func (h *ReviewAdminHandler) Reject(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /admin/reviews/{id} [delete]
 func (h *ReviewAdminHandler) Delete(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	id, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	review, err := h.reviews.Get(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "review not found"})
+		httpx.Error(c, http.StatusNotFound, "review not found")
 		return
 	}
 
 	if err := h.reviews.DeleteReview(c.Request.Context(), review); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.Status(http.StatusNoContent)
-}
-
-func mustAtoi(val string) int {
-	n, _ := strconv.Atoi(val)
-	return n
 }

@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/models"
 	"github.com/hdu-dp/backend/internal/services"
+	"gorm.io/gorm"
 )
 
 // ReviewStatsHandler handles review statistics HTTP endpoints
@@ -31,15 +33,14 @@ func NewReviewStatsHandler(reviewStatsService *services.ReviewStatsService) *Rev
 // @Failure      500 {object} object{error=string} "服务器内部错误"
 // @Router       /reviews/{id}/stats [get]
 func (h *ReviewStatsHandler) GetReviewStats(c *gin.Context) {
-	reviewID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	stats, err := h.reviewStatsService.GetReviewStats(c.Request.Context(), reviewID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -56,14 +57,13 @@ func (h *ReviewStatsHandler) GetReviewStats(c *gin.Context) {
 // @Failure      500 {object} object{error=string} "服务器内部错误"
 // @Router       /reviews/{id}/view [post]
 func (h *ReviewStatsHandler) RecordView(c *gin.Context) {
-	reviewID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	if err := h.reviewStatsService.RecordView(c.Request.Context(), reviewID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -84,26 +84,27 @@ func (h *ReviewStatsHandler) RecordView(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /reviews/{id}/react [post]
 func (h *ReviewStatsHandler) ToggleReaction(c *gin.Context) {
-	reviewID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
-	userID := c.MustGet("user_id").(uuid.UUID)
+	userID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
+	if !ok {
+		return
+	}
 
 	var req struct {
 		Type string `json:"type" binding:"required,oneof=like dislike"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if !httpx.BindJSON(c, &req, "type 仅支持 like 或 dislike") {
 		return
 	}
 
 	reactionType := models.ReactionType(req.Type)
 	if err := h.reviewStatsService.ToggleReaction(c.Request.Context(), reviewID, userID, reactionType); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -125,21 +126,23 @@ func (h *ReviewStatsHandler) ToggleReaction(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /reviews/{id}/user-reaction [get]
 func (h *ReviewStatsHandler) GetUserReaction(c *gin.Context) {
-	reviewID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
-	userID := c.MustGet("user_id").(uuid.UUID)
+	userID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
+	if !ok {
+		return
+	}
 
 	reaction, err := h.reviewStatsService.GetUserReaction(c.Request.Context(), reviewID, userID)
 	if err != nil {
-		if err.Error() == "record not found" {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusOK, gin.H{"reaction": nil})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -156,7 +159,7 @@ func (h *ReviewStatsHandler) GetUserReaction(c *gin.Context) {
 func (h *ReviewStatsHandler) GetSiteStats(c *gin.Context) {
 	stats, err := h.reviewStatsService.GetSiteStats(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -173,7 +176,7 @@ func (h *ReviewStatsHandler) GetSiteStats(c *gin.Context) {
 func (h *ReviewStatsHandler) GetTotalViews(c *gin.Context) {
 	totalViews, err := h.reviewStatsService.GetSiteTotalViews(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

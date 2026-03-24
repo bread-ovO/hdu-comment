@@ -11,8 +11,17 @@ import (
 // Config represents application level configuration values.
 type Config struct {
 	Server struct {
-		Port string
-		Mode string
+		Port              string
+		Mode              string
+		ReadHeaderTimeout time.Duration
+		ReadTimeout       time.Duration
+		WriteTimeout      time.Duration
+		IdleTimeout       time.Duration
+		ShutdownTimeout   time.Duration
+	}
+	Log struct {
+		Level  string
+		Format string
 	}
 	Database struct {
 		Driver string
@@ -65,6 +74,14 @@ func Load() (*Config, error) {
 
 	v.SetDefault("SERVER_PORT", "8080")
 	v.SetDefault("SERVER_MODE", "release")
+	v.SetDefault("SERVER_READ_HEADER_TIMEOUT", "5s")
+	v.SetDefault("SERVER_READ_TIMEOUT", "15s")
+	v.SetDefault("SERVER_WRITE_TIMEOUT", "30s")
+	v.SetDefault("SERVER_IDLE_TIMEOUT", "60s")
+	v.SetDefault("SERVER_SHUTDOWN_TIMEOUT", "10s")
+
+	v.SetDefault("LOG_LEVEL", "info")
+	v.SetDefault("LOG_FORMAT", "text")
 
 	v.SetDefault("DATABASE_DRIVER", "sqlite")
 	v.SetDefault("DATABASE_DSN", "file:data/app.db?_fk=1&mode=rwc")
@@ -90,17 +107,42 @@ func Load() (*Config, error) {
 	v.SetDefault("STORAGE_S3_BASE_URL", "")
 	v.SetDefault("CORS_ALLOW_ORIGINS", "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174,https://hddp.blueloaf.top")
 
-	accessTTL, err := time.ParseDuration(v.GetString("AUTH_ACCESS_TOKEN_TTL"))
+	readHeaderTimeout, err := parseDuration(v, "SERVER_READ_HEADER_TIMEOUT")
+	if err != nil {
+		return nil, fmt.Errorf("invalid READ_HEADER_TIMEOUT: %w", err)
+	}
+
+	readTimeout, err := parseDuration(v, "SERVER_READ_TIMEOUT")
+	if err != nil {
+		return nil, fmt.Errorf("invalid READ_TIMEOUT: %w", err)
+	}
+
+	writeTimeout, err := parseDuration(v, "SERVER_WRITE_TIMEOUT")
+	if err != nil {
+		return nil, fmt.Errorf("invalid WRITE_TIMEOUT: %w", err)
+	}
+
+	idleTimeout, err := parseDuration(v, "SERVER_IDLE_TIMEOUT")
+	if err != nil {
+		return nil, fmt.Errorf("invalid IDLE_TIMEOUT: %w", err)
+	}
+
+	shutdownTimeout, err := parseDuration(v, "SERVER_SHUTDOWN_TIMEOUT")
+	if err != nil {
+		return nil, fmt.Errorf("invalid SHUTDOWN_TIMEOUT: %w", err)
+	}
+
+	accessTTL, err := parseDuration(v, "AUTH_ACCESS_TOKEN_TTL")
 	if err != nil {
 		return nil, fmt.Errorf("invalid ACCESS_TOKEN ttl: %w", err)
 	}
 
-	refreshTTL, err := time.ParseDuration(v.GetString("AUTH_REFRESH_TOKEN_TTL"))
+	refreshTTL, err := parseDuration(v, "AUTH_REFRESH_TOKEN_TTL")
 	if err != nil {
 		return nil, fmt.Errorf("invalid REFRESH_TOKEN ttl: %w", err)
 	}
 
-	smsCodeTTL, err := time.ParseDuration(v.GetString("AUTH_SMS_CODE_TTL"))
+	smsCodeTTL, err := parseDuration(v, "AUTH_SMS_CODE_TTL")
 	if err != nil {
 		return nil, fmt.Errorf("invalid SMS_CODE ttl: %w", err)
 	}
@@ -108,6 +150,13 @@ func Load() (*Config, error) {
 	cfg := &Config{}
 	cfg.Server.Port = v.GetString("SERVER_PORT")
 	cfg.Server.Mode = v.GetString("SERVER_MODE")
+	cfg.Server.ReadHeaderTimeout = readHeaderTimeout
+	cfg.Server.ReadTimeout = readTimeout
+	cfg.Server.WriteTimeout = writeTimeout
+	cfg.Server.IdleTimeout = idleTimeout
+	cfg.Server.ShutdownTimeout = shutdownTimeout
+	cfg.Log.Level = strings.TrimSpace(strings.ToLower(v.GetString("LOG_LEVEL")))
+	cfg.Log.Format = strings.TrimSpace(strings.ToLower(v.GetString("LOG_FORMAT")))
 
 	cfg.Database.Driver = v.GetString("DATABASE_DRIVER")
 	cfg.Database.DSN = v.GetString("DATABASE_DSN")
@@ -164,4 +213,8 @@ func splitAndClean(value string) []string {
 		}
 	}
 	return result
+}
+
+func parseDuration(v *viper.Viper, key string) (time.Duration, error) {
+	return time.ParseDuration(v.GetString(key))
 }

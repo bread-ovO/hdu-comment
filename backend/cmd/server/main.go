@@ -1,20 +1,15 @@
 package main
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/hdu-dp/backend/internal/auth"
+	"github.com/hdu-dp/backend/internal/app"
 	"github.com/hdu-dp/backend/internal/config"
-	"github.com/hdu-dp/backend/internal/database"
-	"github.com/hdu-dp/backend/internal/handlers"
-	adminHandlers "github.com/hdu-dp/backend/internal/handlers/admin"
-	"github.com/hdu-dp/backend/internal/middleware"
-	"github.com/hdu-dp/backend/internal/repository"
-	"github.com/hdu-dp/backend/internal/router"
-	"github.com/hdu-dp/backend/internal/services"
-	"github.com/hdu-dp/backend/internal/storage"
 )
 
 // @title           杭电点评 API
@@ -38,120 +33,21 @@ import (
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("load config: %v", err)
+		fmt.Fprintf(os.Stderr, "load config: %v\n", err)
+		os.Exit(1)
 	}
 
-	if cfg.Server.Mode != "" {
-		gin.SetMode(cfg.Server.Mode)
-	}
-
-	db, err := database.Init(cfg)
+	application, err := app.New(cfg)
 	if err != nil {
-		log.Fatalf("init database: %v", err)
+		fmt.Fprintf(os.Stderr, "build app: %v\n", err)
+		os.Exit(1)
 	}
 
-	userRepo := repository.NewUserRepository(db)
-	reviewRepo := repository.NewReviewRepository(db)
-	refreshRepo := repository.NewRefreshTokenRepository(db)
-	smsCodeRepo := repository.NewSMSCodeRepository(db)
-	emailVerificationRepo := repository.NewEmailVerificationRepository(db)
-	reviewStatsRepo := repository.NewReviewStatsRepository(db)
-	reviewReactionRepo := repository.NewReviewReactionRepository(db)
-	siteStatsRepo := repository.NewSiteStatsRepository(db)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	emailCfg := config.LoadEmailConfig()
-	emailService := services.NewEmailService(emailCfg)
-	emailVerificationService := services.NewEmailVerificationService(
-		emailVerificationRepo,
-		userRepo,
-		emailService,
-		emailCfg.FrontendBaseURL,
-	)
-
-	storageProvider, err := storage.New(cfg)
-	if err != nil {
-		log.Fatalf("init storage: %v", err)
-	}
-
-	jwtManager := auth.NewJWTManager(cfg.Auth.JWTSecret, cfg.Auth.AccessTokenTTL)
-	qqOAuthService := services.NewQQOAuthService(
-		cfg.Auth.QQ.Enabled,
-		cfg.Auth.QQ.AppID,
-		cfg.Auth.QQ.AppSecret,
-		cfg.Auth.QQ.RedirectURI,
-		cfg.Auth.JWTSecret,
-	)
-
-	authService := services.NewAuthService(
-		userRepo,
-		jwtManager,
-		refreshRepo,
-		smsCodeRepo,
-		qqOAuthService,
-		services.AuthServiceOptions{
-			RefreshTTL: cfg.Auth.RefreshTokenTTL,
-			SMSCodeTTL: cfg.Auth.SMS.CodeTTL,
-			SMSEnabled: cfg.Auth.SMS.Enabled,
-			SMSDevMode: cfg.Auth.SMS.DevMode,
-			AdminEmail: cfg.Admin.Email,
-		},
-	)
-	reviewService := services.NewReviewService(reviewRepo, storageProvider)
-	reviewStatsService := services.NewReviewStatsService(reviewStatsRepo, reviewReactionRepo, siteStatsRepo)
-
-	authHandler := handlers.NewAuthHandler(authService, emailVerificationService)
-	userHandler := handlers.NewUserHandler(userRepo)
-	reviewHandler := handlers.NewReviewHandler(reviewService)
-	reviewStatsHandler := handlers.NewReviewStatsHandler(reviewStatsService)
-	adminReviewHandler := adminHandlers.NewReviewAdminHandler(reviewService)
-	adminUserHandler := adminHandlers.NewUserAdminHandler(userRepo)
-	emailVerificationHandler := handlers.NewEmailVerificationHandler(emailVerificationService)
-
-	authMiddleware := middleware.NewAuthMiddleware(jwtManager, userRepo)
-
-	engine := gin.New()
-	engine.Use(gin.Logger(), gin.Recovery())
-
-	allowedOrigins := cfg.CORS.AllowOrigins
-	if len(allowedOrigins) == 0 {
-		allowedOrigins = []string{
-			"http://localhost:5173",
-			"http://localhost:5174",
-			"http://127.0.0.1:5173",
-			"http://127.0.0.1:5174",
-			"https://hddp.blueloaf.top",
-		}
-	}
-
-	corsConfig := cors.Config{
-		AllowOrigins:     allowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}
-
-	engine.Use(cors.New(corsConfig))
-
-	staticUploads := cfg.Storage.UploadDir
-	if cfg.Storage.Provider != "local" && cfg.Storage.Provider != "" {
-		staticUploads = ""
-	}
-
-	router.Register(router.Params{
-		Engine:                   engine,
-		AuthMiddleware:           authMiddleware,
-		AuthHandler:              authHandler,
-		UserHandler:              userHandler,
-		ReviewHandler:            reviewHandler,
-		ReviewStatsHandler:       reviewStatsHandler,
-		EmailVerificationHandler: emailVerificationHandler,
-		AdminHandler:             adminReviewHandler,
-		AdminUserHandler:         adminUserHandler,
-		StaticUploadDir:          staticUploads,
-	})
-
-	if err := engine.Run(":" + cfg.Server.Port); err != nil {
-		log.Fatalf("server exited: %v", err)
+	if err := application.Run(ctx); err != nil {
+		slog.Error("application exited with error", slog.Any("error", err))
+		os.Exit(1)
 	}
 }

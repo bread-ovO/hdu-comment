@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/repository"
 )
 
@@ -28,21 +28,14 @@ func NewUserHandler(users *repository.UserRepository) *UserHandler {
 // @Security     ApiKeyAuth
 // @Router       /users/me [get]
 func (h *UserHandler) Me(c *gin.Context) {
-	idVal, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing user"})
-		return
-	}
-
-	userID, ok := idVal.(uuid.UUID)
+	userID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid user id"})
 		return
 	}
 
 	user, err := h.users.FindByID(userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		httpx.Error(c, http.StatusNotFound, "user not found")
 		return
 	}
 

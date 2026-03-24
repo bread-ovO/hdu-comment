@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/services"
 )
 
@@ -36,19 +37,18 @@ func (h *EmailVerificationHandler) SendRegistrationCode(c *gin.Context) {
 		Email string `json:"email" binding:"required,email"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请输入有效的邮箱地址"})
+	if !httpx.BindJSON(c, &req, "请输入有效的邮箱地址") {
 		return
 	}
 
 	if err := h.emailVerificationService.SendRegistrationCode(c.Request.Context(), req.Email); err != nil {
 		switch {
 		case errors.Is(err, services.ErrEmailAlreadyUsed):
-			c.JSON(http.StatusConflict, gin.H{"error": "该邮箱已注册"})
+			httpx.Error(c, http.StatusConflict, "该邮箱已注册")
 		case errors.Is(err, services.ErrEmailServiceNotConfigured):
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "邮件服务未配置，请联系管理员"})
+			httpx.Error(c, http.StatusInternalServerError, "邮件服务未配置，请联系管理员")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "发送验证码失败，请稍后重试"})
+			httpx.Error(c, http.StatusInternalServerError, "发送验证码失败，请稍后重试")
 		}
 		return
 	}
@@ -72,13 +72,13 @@ func (h *EmailVerificationHandler) SendVerificationEmail(c *gin.Context) {
 	if err := h.emailVerificationService.ResendVerificationEmail(c.Request.Context(), userID); err != nil {
 		switch {
 		case errors.Is(err, services.ErrUserNotFound):
-			c.JSON(http.StatusBadRequest, gin.H{"error": "用户不存在"})
+			httpx.Error(c, http.StatusBadRequest, "用户不存在")
 		case errors.Is(err, services.ErrEmailAlreadyVerified):
-			c.JSON(http.StatusConflict, gin.H{"error": "邮箱已验证"})
+			httpx.Error(c, http.StatusConflict, "邮箱已验证")
 		case errors.Is(err, services.ErrEmailServiceNotConfigured):
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "邮件服务未配置，请联系管理员"})
+			httpx.Error(c, http.StatusInternalServerError, "邮件服务未配置，请联系管理员")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "发送失败，请稍后重试"})
+			httpx.Error(c, http.StatusInternalServerError, "发送失败，请稍后重试")
 		}
 		return
 	}
@@ -101,21 +101,20 @@ func (h *EmailVerificationHandler) VerifyEmail(c *gin.Context) {
 		Token string `json:"token" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的请求参数"})
+	if !httpx.BindJSON(c, &req, "无效的请求参数") {
 		return
 	}
 
 	if err := h.emailVerificationService.VerifyEmail(c.Request.Context(), req.Token); err != nil {
 		switch {
 		case errors.Is(err, services.ErrInvalidVerificationToken):
-			c.JSON(http.StatusNotFound, gin.H{"error": "无效的验证令牌"})
+			httpx.Error(c, http.StatusNotFound, "无效的验证令牌")
 		case errors.Is(err, services.ErrVerificationTokenExpired):
-			c.JSON(http.StatusBadRequest, gin.H{"error": "验证令牌已过期或已使用"})
+			httpx.Error(c, http.StatusBadRequest, "验证令牌已过期或已使用")
 		case errors.Is(err, services.ErrUserNotFound):
-			c.JSON(http.StatusBadRequest, gin.H{"error": "用户不存在"})
+			httpx.Error(c, http.StatusBadRequest, "用户不存在")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "验证失败，请稍后重试"})
+			httpx.Error(c, http.StatusInternalServerError, "验证失败，请稍后重试")
 		}
 		return
 	}
@@ -137,10 +136,10 @@ func (h *EmailVerificationHandler) GetVerificationStatus(c *gin.Context) {
 	verified, err := h.emailVerificationService.GetVerificationStatus(c.Request.Context(), userID)
 	if err != nil {
 		if errors.Is(err, services.ErrUserNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "用户不存在"})
+			httpx.Error(c, http.StatusNotFound, "用户不存在")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取用户信息失败"})
+		httpx.Error(c, http.StatusInternalServerError, "获取用户信息失败")
 		return
 	}
 

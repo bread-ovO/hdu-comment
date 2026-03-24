@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hdu-dp/backend/internal/common"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/models"
 	"github.com/hdu-dp/backend/internal/services"
 )
@@ -37,19 +38,18 @@ func NewAuthHandler(authService *services.AuthService, emailVerificationService 
 // @Router       /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req struct {
-		Email       string `json:"email"`
-		Password    string `json:"password"`
-		DisplayName string `json:"display_name"`
-		Code        string `json:"code"`
+		Email       string `json:"email" binding:"required,email"`
+		Password    string `json:"password" binding:"required,min=6"`
+		DisplayName string `json:"display_name" binding:"required,max=64"`
+		Code        string `json:"code" binding:"required,len=6"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "请输入完整且有效的注册信息") {
 		return
 	}
 
 	if h.emailVerificationService == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "注册功能暂不可用"})
+		httpx.Error(c, http.StatusServiceUnavailable, "注册功能暂不可用")
 		return
 	}
 
@@ -58,13 +58,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	if verification, err = h.emailVerificationService.ValidateRegistrationCode(c.Request.Context(), req.Email, req.Code); err != nil {
 		switch {
 		case errors.Is(err, services.ErrVerificationCodeRequired):
-			c.JSON(http.StatusBadRequest, gin.H{"error": "请输入验证码"})
+			httpx.Error(c, http.StatusBadRequest, "请输入验证码")
 		case errors.Is(err, services.ErrInvalidVerificationToken):
-			c.JSON(http.StatusBadRequest, gin.H{"error": "验证码不正确"})
+			httpx.Error(c, http.StatusBadRequest, "验证码不正确")
 		case errors.Is(err, services.ErrVerificationTokenExpired):
-			c.JSON(http.StatusBadRequest, gin.H{"error": "验证码已过期，请重新获取"})
+			httpx.Error(c, http.StatusBadRequest, "验证码已过期，请重新获取")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "验证验证码失败"})
+			httpx.Error(c, http.StatusInternalServerError, "验证验证码失败")
 		}
 		return
 	}
@@ -73,16 +73,19 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrEmailAlreadyUsed:
-			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusConflict, err.Error())
 		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusBadRequest, err.Error())
 		}
 		return
 	}
 
 	if h.emailVerificationService != nil && verification != nil {
 		if verifiedAt, err := h.emailVerificationService.CompleteRegistrationVerification(c.Request.Context(), verification, result.User.ID); err != nil {
-			log.Printf("failed to complete registration verification for user %s: %v", result.User.ID, err)
+			slog.Warn("failed to complete registration verification",
+				slog.String("user_id", result.User.ID.String()),
+				slog.Any("error", err),
+			)
 		} else {
 			result.User.EmailVerified = true
 			result.User.EmailVerifiedAt = verifiedAt
@@ -104,12 +107,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Router       /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "请输入有效的邮箱和密码") {
 		return
 	}
 
@@ -117,9 +119,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrInvalidCredentials:
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusUnauthorized, err.Error())
 		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusBadRequest, err.Error())
 		}
 		return
 	}
@@ -133,9 +135,9 @@ func (h *AuthHandler) QQAuthURL(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrQQServiceUnavailable:
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "QQ 登录暂不可用"})
+			httpx.Error(c, http.StatusServiceUnavailable, "QQ 登录暂不可用")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "生成 QQ 登录链接失败"})
+			httpx.Error(c, http.StatusInternalServerError, "生成 QQ 登录链接失败")
 		}
 		return
 	}
@@ -149,12 +151,11 @@ func (h *AuthHandler) QQAuthURL(c *gin.Context) {
 // QQLogin handles login with QQ oauth code.
 func (h *AuthHandler) QQLogin(c *gin.Context) {
 	var req struct {
-		Code  string `json:"code"`
-		State string `json:"state"`
+		Code  string `json:"code" binding:"required"`
+		State string `json:"state" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "缺少 QQ 登录参数") {
 		return
 	}
 
@@ -162,11 +163,11 @@ func (h *AuthHandler) QQLogin(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrQQServiceUnavailable:
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "QQ 登录暂不可用"})
+			httpx.Error(c, http.StatusServiceUnavailable, "QQ 登录暂不可用")
 		case common.ErrInvalidQQState:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "QQ 登录态已失效，请重试"})
+			httpx.Error(c, http.StatusBadRequest, "QQ 登录态已失效，请重试")
 		default:
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "QQ 登录失败"})
+			httpx.Error(c, http.StatusUnauthorized, "QQ 登录失败")
 		}
 		return
 	}
@@ -177,10 +178,9 @@ func (h *AuthHandler) QQLogin(c *gin.Context) {
 // SendSMSCode sends login verification code to a phone number.
 func (h *AuthHandler) SendSMSCode(c *gin.Context) {
 	var req struct {
-		Phone string `json:"phone"`
+		Phone string `json:"phone" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "请输入手机号") {
 		return
 	}
 
@@ -188,11 +188,11 @@ func (h *AuthHandler) SendSMSCode(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrInvalidPhoneNumber:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "手机号格式不正确"})
+			httpx.Error(c, http.StatusBadRequest, "手机号格式不正确")
 		case common.ErrSMSServiceUnavailable:
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "短信登录暂不可用"})
+			httpx.Error(c, http.StatusServiceUnavailable, "短信登录暂不可用")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "发送短信验证码失败"})
+			httpx.Error(c, http.StatusInternalServerError, "发送短信验证码失败")
 		}
 		return
 	}
@@ -207,11 +207,10 @@ func (h *AuthHandler) SendSMSCode(c *gin.Context) {
 // SMSLogin logs in user by phone and sms code.
 func (h *AuthHandler) SMSLogin(c *gin.Context) {
 	var req struct {
-		Phone string `json:"phone"`
-		Code  string `json:"code"`
+		Phone string `json:"phone" binding:"required"`
+		Code  string `json:"code" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "请输入手机号和验证码") {
 		return
 	}
 
@@ -219,13 +218,13 @@ func (h *AuthHandler) SMSLogin(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrInvalidPhoneNumber:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "手机号格式不正确"})
+			httpx.Error(c, http.StatusBadRequest, "手机号格式不正确")
 		case common.ErrInvalidSMSCode:
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "验证码错误或已过期"})
+			httpx.Error(c, http.StatusUnauthorized, "验证码错误或已过期")
 		case common.ErrSMSServiceUnavailable:
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "短信登录暂不可用"})
+			httpx.Error(c, http.StatusServiceUnavailable, "短信登录暂不可用")
 		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "短信登录失败"})
+			httpx.Error(c, http.StatusInternalServerError, "短信登录失败")
 		}
 		return
 	}
@@ -245,10 +244,9 @@ func (h *AuthHandler) SMSLogin(c *gin.Context) {
 // @Router       /auth/refresh [post]
 func (h *AuthHandler) Refresh(c *gin.Context) {
 	var req struct {
-		RefreshToken string `json:"refresh_token"`
+		RefreshToken string `json:"refresh_token" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil || req.RefreshToken == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "refresh_token 不能为空") {
 		return
 	}
 
@@ -256,9 +254,9 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case common.ErrInvalidRefreshToken:
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusUnauthorized, err.Error())
 		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusBadRequest, err.Error())
 		}
 		return
 	}
@@ -278,19 +276,18 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 // @Router       /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	var req struct {
-		RefreshToken string `json:"refresh_token"`
+		RefreshToken string `json:"refresh_token" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil || req.RefreshToken == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "refresh_token 不能为空") {
 		return
 	}
 
 	if err := h.authService.Logout(req.RefreshToken); err != nil {
 		switch err {
 		case common.ErrInvalidRefreshToken:
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusUnauthorized, err.Error())
 		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			httpx.Error(c, http.StatusBadRequest, err.Error())
 		}
 		return
 	}

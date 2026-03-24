@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/models"
 	"github.com/hdu-dp/backend/internal/services"
 	"github.com/hdu-dp/backend/internal/storage"
@@ -40,7 +40,7 @@ func (h *ReviewHandler) ListPublic(c *gin.Context) {
 	filters := parseListFilters(c)
 	result, err := h.reviews.ListPublic(filters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -57,16 +57,18 @@ func (h *ReviewHandler) ListPublic(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /reviews [post]
 func (h *ReviewHandler) Submit(c *gin.Context) {
-	userID := c.MustGet("user_id").(uuid.UUID)
+	userID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
+	if !ok {
+		return
+	}
 	var req struct {
-		Title       string  `json:"title"`
-		Address     string  `json:"address"`
-		Description string  `json:"description"`
-		Rating      float32 `json:"rating"`
+		Title       string  `json:"title" binding:"required,max=128"`
+		Address     string  `json:"address" binding:"required,max=255"`
+		Description string  `json:"description" binding:"max=4000"`
+		Rating      float32 `json:"rating" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+	if !httpx.BindJSON(c, &req, "请输入完整且有效的点评信息") {
 		return
 	}
 
@@ -77,7 +79,7 @@ func (h *ReviewHandler) Submit(c *gin.Context) {
 		Rating:      req.Rating,
 	})
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -95,15 +97,14 @@ func (h *ReviewHandler) Submit(c *gin.Context) {
 // @Failure      404 {object} object{error=string} "点评不存在"
 // @Router       /reviews/{id} [get]
 func (h *ReviewHandler) Detail(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	id, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	review, err := h.reviews.Get(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "review not found"})
+		httpx.Error(c, http.StatusNotFound, "review not found")
 		return
 	}
 
@@ -117,7 +118,7 @@ func (h *ReviewHandler) Detail(c *gin.Context) {
 			userVal, ok := c.Get("user_id")
 			userID, okID := userVal.(uuid.UUID)
 			if !ok || !okID || review.AuthorID != userID {
-				c.JSON(http.StatusForbidden, gin.H{"error": "review not accessible"})
+				httpx.Error(c, http.StatusForbidden, "review not accessible")
 				return
 			}
 		}
@@ -140,11 +141,14 @@ func (h *ReviewHandler) Detail(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /reviews/me [get]
 func (h *ReviewHandler) MyReviews(c *gin.Context) {
-	userID := c.MustGet("user_id").(uuid.UUID)
+	userID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
+	if !ok {
+		return
+	}
 	filters := parseListFilters(c)
 	result, err := h.reviews.ListByAuthor(userID, filters)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, result)
@@ -166,37 +170,39 @@ func (h *ReviewHandler) MyReviews(c *gin.Context) {
 // @Security     ApiKeyAuth
 // @Router       /reviews/{id}/images [post]
 func (h *ReviewHandler) UploadImage(c *gin.Context) {
-	reviewID, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid review id"})
+	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
+	if !ok {
 		return
 	}
 
 	review, err := h.reviews.Get(reviewID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "review not found"})
+		httpx.Error(c, http.StatusNotFound, "review not found")
 		return
 	}
 
-	userID := c.MustGet("user_id").(uuid.UUID)
+	userID, ok := httpx.MustContextUUID(c, "user_id", "missing user", "invalid user id")
+	if !ok {
+		return
+	}
 	if err := services.ValidateOwnership(review, userID); err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": "not owner"})
+		httpx.Error(c, http.StatusForbidden, "not owner")
 		return
 	}
 
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
+		httpx.Error(c, http.StatusBadRequest, "file is required")
 		return
 	}
 	if fileHeader.Size > maxImageUploadSize {
-		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": "image size must not exceed 10MB"})
+		httpx.Error(c, http.StatusRequestEntityTooLarge, "image size must not exceed 10MB")
 		return
 	}
 
 	opened, err := fileHeader.Open()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -209,7 +215,7 @@ func (h *ReviewHandler) UploadImage(c *gin.Context) {
 
 	image, err := h.reviews.StoreImage(c.Request.Context(), reviewID, uploadFile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		httpx.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -217,15 +223,13 @@ func (h *ReviewHandler) UploadImage(c *gin.Context) {
 }
 
 func parseListFilters(c *gin.Context) services.ListFilters {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	query := strings.TrimSpace(c.Query("query"))
 	sortBy := c.DefaultQuery("sort", "created_at")
 	sortDir := c.DefaultQuery("order", "desc")
 
 	return services.ListFilters{
-		Page:     page,
-		PageSize: pageSize,
+		Page:     httpx.QueryInt(c, "page", 1, 1, 0),
+		PageSize: httpx.QueryInt(c, "page_size", 10, 1, 100),
 		Query:    query,
 		SortBy:   sortBy,
 		SortDir:  sortDir,

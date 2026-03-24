@@ -73,6 +73,10 @@ docker compose down
 
 ## 重要配置项
 - `APP_SERVER_PORT`：服务端口，默认 `8080`
+- `APP_SERVER_READ_HEADER_TIMEOUT` / `APP_SERVER_READ_TIMEOUT` / `APP_SERVER_WRITE_TIMEOUT` / `APP_SERVER_IDLE_TIMEOUT`：HTTP 服务超时配置
+- `APP_SERVER_SHUTDOWN_TIMEOUT`：优雅退出超时时间，默认 `10s`
+- `APP_LOG_LEVEL`：日志级别，支持 `debug` / `info` / `warn` / `error`
+- `APP_LOG_FORMAT`：日志格式，支持 `text` / `json`
 - `APP_DATABASE_DSN`：数据库 DSN，默认 `file:data/app.db?_fk=1&mode=rwc`
 - `APP_AUTH_JWT_SECRET`：JWT 密钥（必填）
 - `APP_AUTH_REFRESH_TOKEN_TTL`：刷新令牌有效期，默认 `168h`
