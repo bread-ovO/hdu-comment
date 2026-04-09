@@ -48,6 +48,15 @@ func (r *UserRepository) FindByQQOpenID(openID string) (*models.User, error) {
 	return &user, nil
 }
 
+// FindByWeChatOpenID fetches a user by WeChat openid.
+func (r *UserRepository) FindByWeChatOpenID(openID string) (*models.User, error) {
+	var user models.User
+	if err := r.db.Where("wechat_open_id = ?", openID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // FindByID fetches a user by primary key.
 func (r *UserRepository) FindByID(id uuid.UUID) (*models.User, error) {
 	var user models.User

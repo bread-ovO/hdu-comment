@@ -38,6 +38,7 @@ func Register(p Params) {
 		auth.POST("/login", p.AuthHandler.Login)
 		auth.GET("/qq/url", p.AuthHandler.QQAuthURL)
 		auth.POST("/qq/login", p.AuthHandler.QQLogin)
+		auth.POST("/wechat/login", p.AuthHandler.WeChatLogin)
 		auth.POST("/sms/send-code", p.AuthHandler.SendSMSCode)
 		auth.POST("/sms/login", p.AuthHandler.SMSLogin)
 		auth.POST("/refresh", p.AuthHandler.Refresh)

@@ -37,6 +37,11 @@ type Config struct {
 			AppSecret   string
 			RedirectURI string
 		}
+		WeChat struct {
+			Enabled bool
+			AppID   string
+			Secret  string
+		}
 		SMS struct {
 			Enabled bool
 			CodeTTL time.Duration
@@ -90,6 +95,7 @@ func Load() (*Config, error) {
 	v.SetDefault("AUTH_REFRESH_TOKEN_TTL", "168h")
 	v.SetDefault("AUTH_QQ_ENABLED", false)
 	v.SetDefault("AUTH_QQ_REDIRECT_URI", "http://localhost:5173/login")
+	v.SetDefault("AUTH_WECHAT_ENABLED", false)
 	v.SetDefault("AUTH_SMS_ENABLED", false)
 	v.SetDefault("AUTH_SMS_CODE_TTL", "10m")
 	v.SetDefault("AUTH_SMS_DEV_MODE", true)
@@ -168,6 +174,9 @@ func Load() (*Config, error) {
 	cfg.Auth.QQ.AppID = strings.TrimSpace(v.GetString("AUTH_QQ_APP_ID"))
 	cfg.Auth.QQ.AppSecret = strings.TrimSpace(v.GetString("AUTH_QQ_APP_SECRET"))
 	cfg.Auth.QQ.RedirectURI = strings.TrimSpace(v.GetString("AUTH_QQ_REDIRECT_URI"))
+	cfg.Auth.WeChat.Enabled = v.GetBool("AUTH_WECHAT_ENABLED")
+	cfg.Auth.WeChat.AppID = strings.TrimSpace(v.GetString("AUTH_WECHAT_APP_ID"))
+	cfg.Auth.WeChat.Secret = strings.TrimSpace(v.GetString("AUTH_WECHAT_SECRET"))
 	cfg.Auth.SMS.Enabled = v.GetBool("AUTH_SMS_ENABLED")
 	cfg.Auth.SMS.CodeTTL = smsCodeTTL
 	cfg.Auth.SMS.DevMode = v.GetBool("AUTH_SMS_DEV_MODE")
@@ -194,6 +203,12 @@ func Load() (*Config, error) {
 	if cfg.Auth.QQ.Enabled {
 		if cfg.Auth.QQ.AppID == "" || cfg.Auth.QQ.AppSecret == "" || cfg.Auth.QQ.RedirectURI == "" {
 			return nil, fmt.Errorf("qq login enabled but APP_AUTH_QQ_APP_ID/APP_AUTH_QQ_APP_SECRET/APP_AUTH_QQ_REDIRECT_URI not fully set")
+		}
+	}
+
+	if cfg.Auth.WeChat.Enabled {
+		if cfg.Auth.WeChat.AppID == "" || cfg.Auth.WeChat.Secret == "" {
+			return nil, fmt.Errorf("wechat login enabled but APP_AUTH_WECHAT_APP_ID/APP_AUTH_WECHAT_SECRET not fully set")
 		}
 	}
 

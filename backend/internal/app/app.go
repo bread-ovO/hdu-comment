@@ -75,6 +75,11 @@ func New(cfg *config.Config) (*App, error) {
 		cfg.Auth.QQ.RedirectURI,
 		cfg.Auth.JWTSecret,
 	)
+	wechatOAuthService := services.NewWeChatOAuthService(
+		cfg.Auth.WeChat.Enabled,
+		cfg.Auth.WeChat.AppID,
+		cfg.Auth.WeChat.Secret,
+	)
 
 	authService := services.NewAuthService(
 		userRepo,
@@ -82,6 +87,7 @@ func New(cfg *config.Config) (*App, error) {
 		refreshRepo,
 		smsCodeRepo,
 		qqOAuthService,
+		wechatOAuthService,
 		services.AuthServiceOptions{
 			RefreshTTL: cfg.Auth.RefreshTokenTTL,
 			SMSCodeTTL: cfg.Auth.SMS.CodeTTL,

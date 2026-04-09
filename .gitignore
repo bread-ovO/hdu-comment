@@ -1,8 +1,12 @@
+# Generated skill files
+SKILL.md
+
 # Go build artifacts
 backend/bin/
 backend/data/
 backend/uploads/
 backend/coverage.out
+backend/.gocache/
 
 # Node/Vite artifacts
 frontend/node_modules/
@@ -17,3 +21,9 @@ frontend/dist/
 .env
 backend/.env
 frontend/.env
+
+mini-program/hdu-comment-mini/node_modules/
+mini-program/hdu-comment-mini/dist/
+mini-program/hdu-comment-mini/.swc/
+mini-program/hdu-comment-mini/.eslintcache
+mini-program/hdu-comment-mini/project.private.config.json

@@ -1,0 +1,250 @@
+.my-reviews-page {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+}
+
+.my-reviews-content {
+  padding: 24rpx 24rpx 40rpx;
+}
+
+.login-card,
+.profile-card {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl);
+  border: 1rpx solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.login-card {
+  padding: 36rpx 32rpx;
+}
+
+.login-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.login-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.login-btn {
+  width: 240rpx;
+  margin-top: 24rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--primary-color);
+}
+
+.login-btn-text {
+  display: block;
+  text-align: center;
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.profile-card {
+  padding: 30rpx 28rpx;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.profile-copy {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.profile-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.user-email {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.logout-btn {
+  padding: 14rpx 20rpx;
+  background: var(--bg-tertiary);
+  border-radius: 999rpx;
+}
+
+.logout-btn-text {
+  font-size: 22rpx;
+  color: var(--text-secondary);
+}
+
+.profile-metrics {
+  display: flex;
+}
+
+.metric-card {
+  flex: 1;
+  padding: 18rpx 16rpx;
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius-lg);
+}
+
+.metric-card + .metric-card {
+  margin-left: 12rpx;
+}
+
+.metric-value {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.metric-label {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-tertiary);
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 28rpx 4rpx 16rpx;
+}
+
+.reviews-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.reviews-count {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}
+
+.loading,
+.empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 320rpx;
+  background: var(--bg-primary);
+  border: 1rpx solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  color: var(--text-tertiary);
+  font-size: 28rpx;
+}
+
+.empty-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.empty-desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.review-item {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-xl);
+  padding: 28rpx;
+  margin-bottom: 18rpx;
+  border: 1rpx solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.review-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.review-title-block {
+  flex: 1;
+  margin-right: 12rpx;
+}
+
+.review-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.review-address {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.review-status {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-approved {
+  background-color: #dbeafe;
+  color: var(--primary-color);
+}
+
+.status-rejected {
+  background-color: #fee2e2;
+  color: var(--error-color);
+}
+
+.review-desc {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 16rpx;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.review-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-rating {
+  font-size: 24rpx;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.review-date {
+  font-size: 24rpx;
+  color: var(--text-tertiary);
+}

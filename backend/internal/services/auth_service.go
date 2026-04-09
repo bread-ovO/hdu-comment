@@ -36,6 +36,7 @@ type AuthService struct {
 	refreshTokens *repository.RefreshTokenRepository
 	smsCodes      *repository.SMSCodeRepository
 	qqOAuth       *QQOAuthService
+	wechatOAuth   *WeChatOAuthService
 	refreshTTL    time.Duration
 	smsCodeTTL    time.Duration
 	smsEnabled    bool
@@ -59,6 +60,7 @@ func NewAuthService(
 	refreshRepo *repository.RefreshTokenRepository,
 	smsCodeRepo *repository.SMSCodeRepository,
 	qqOAuth *QQOAuthService,
+	wechatOAuth *WeChatOAuthService,
 	options AuthServiceOptions,
 ) *AuthService {
 	if options.SMSCodeTTL <= 0 {
@@ -70,6 +72,7 @@ func NewAuthService(
 		refreshTokens: refreshRepo,
 		smsCodes:      smsCodeRepo,
 		qqOAuth:       qqOAuth,
+		wechatOAuth:   wechatOAuth,
 		refreshTTL:    options.RefreshTTL,
 		smsCodeTTL:    options.SMSCodeTTL,
 		smsEnabled:    options.SMSEnabled,
@@ -172,6 +175,48 @@ func (s *AuthService) LoginWithQQ(code, state string) (*AuthResult, error) {
 			ID:           uuid.New(),
 			Email:        virtualEmail("qq", profile.OpenID),
 			QQOpenID:     &openIDCopy,
+			PasswordHash: passwordHash,
+			DisplayName:  displayName,
+			Role:         "user",
+		}
+
+		if err := s.users.Create(user); err != nil {
+			return nil, err
+		}
+	}
+
+	return s.issueTokens(user)
+}
+
+// LoginWithWeChat authenticates/creates account using WeChat code.
+func (s *AuthService) LoginWithWeChat(code string) (*AuthResult, error) {
+	if s.wechatOAuth == nil || !s.wechatOAuth.IsEnabled() {
+		return nil, common.ErrWeChatServiceUnavailable
+	}
+
+	profile, err := s.wechatOAuth.CodeToSession(code)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.users.FindByWeChatOpenID(profile.OpenID)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+
+		passwordHash, err := s.hashRandomPassword()
+		if err != nil {
+			return nil, err
+		}
+
+		displayName := "微信用户" + shortSuffix(profile.OpenID)
+
+		openIDCopy := profile.OpenID
+		user = &models.User{
+			ID:           uuid.New(),
+			Email:        virtualEmail("wechat", profile.OpenID),
+			WeChatOpenID: &openIDCopy,
 			PasswordHash: passwordHash,
 			DisplayName:  displayName,
 			Role:         "user",

@@ -1,0 +1,45 @@
+{
+  "name": "hdu-comment-mini",
+  "version": "1.0.0",
+  "description": "杭电美食点评平台小程序",
+  "main": "index.js",
+  "scripts": {
+    "dev:weapp": "taro build --type weapp --watch",
+    "build:weapp": "taro build --type weapp",
+    "dev:h5": "taro build --type h5 --watch",
+    "build:h5": "taro build --type h5",
+    "lint": "eslint --ext .ts,.tsx src",
+    "lint:fix": "eslint --ext .ts,.tsx src --fix"
+  },
+  "dependencies": {
+    "@tarojs/components": "^4.1.11",
+    "@tarojs/plugin-framework-react": "^4.1.11",
+    "@tarojs/plugin-platform-h5": "^4.1.11",
+    "@tarojs/plugin-platform-weapp": "^4.1.11",
+    "@tarojs/react": "^4.1.11",
+    "@tarojs/runtime": "^4.1.11",
+    "@tarojs/taro": "^4.1.11",
+    "@tarojs/webpack5-runner": "^4.1.11",
+    "axios": "^1.6.7",
+    "dayjs": "^1.11.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.29.2",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.2",
+    "@tarojs/cli": "^4.1.11",
+    "@types/react": "^18.2.28",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "babel-preset-taro": "^4.1.11",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.33.0",
+    "react-refresh": "^0.18.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -17,6 +17,10 @@ var (
 	ErrQQServiceUnavailable = errors.New("qq login unavailable")
 	// ErrInvalidQQState indicates the QQ OAuth state is invalid.
 	ErrInvalidQQState = errors.New("invalid qq login state")
+	// ErrWeChatServiceUnavailable indicates WeChat OAuth is disabled or not configured.
+	ErrWeChatServiceUnavailable = errors.New("wechat login unavailable")
+	// ErrInvalidWeChatCode indicates the WeChat auth code is invalid.
+	ErrInvalidWeChatCode = errors.New("invalid wechat auth code")
 	// ErrReviewAlreadyProcessed indicates review status update conflict.
 	ErrReviewAlreadyProcessed = errors.New("review already processed")
 	// ErrInvalidRefreshToken indicates the provided refresh token is invalid or expired.

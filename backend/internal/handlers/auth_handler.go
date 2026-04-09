@@ -175,6 +175,32 @@ func (h *AuthHandler) QQLogin(c *gin.Context) {
 	respondAuthSuccess(c, http.StatusOK, result)
 }
 
+// WeChatLogin handles login with WeChat code.
+func (h *AuthHandler) WeChatLogin(c *gin.Context) {
+	var req struct {
+		Code string `json:"code" binding:"required"`
+	}
+
+	if !httpx.BindJSON(c, &req, "缺少微信登录参数") {
+		return
+	}
+
+	result, err := h.authService.LoginWithWeChat(req.Code)
+	if err != nil {
+		switch err {
+		case common.ErrWeChatServiceUnavailable:
+			httpx.Error(c, http.StatusServiceUnavailable, "微信登录暂不可用")
+		case common.ErrInvalidWeChatCode:
+			httpx.Error(c, http.StatusBadRequest, "微信登录凭证无效")
+		default:
+			httpx.Error(c, http.StatusUnauthorized, "微信登录失败")
+		}
+		return
+	}
+
+	respondAuthSuccess(c, http.StatusOK, result)
+}
+
 // SendSMSCode sends login verification code to a phone number.
 func (h *AuthHandler) SendSMSCode(c *gin.Context) {
 	var req struct {
@@ -304,6 +330,7 @@ func respondAuthSuccess(c *gin.Context, status int, result *services.AuthResult)
 			"email":             result.User.Email,
 			"phone":             result.User.Phone,
 			"qq_open_id":        result.User.QQOpenID,
+			"wechat_open_id":    result.User.WeChatOpenID,
 			"display_name":      result.User.DisplayName,
 			"role":              result.User.Role,
 			"email_verified":    result.User.EmailVerified,
