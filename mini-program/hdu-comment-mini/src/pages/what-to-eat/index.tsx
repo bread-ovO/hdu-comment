@@ -79,12 +79,12 @@ export default function WhatToEat() {
         <View className="what-hero">
           <Text className="what-kicker">Random Pick</Text>
           <Text className="what-title">今天吃这个试试</Text>
-          <Text className="what-desc">从已发布点评里随机抽一条，帮你在犹豫的时候更快做决定。</Text>
+          <Text className="what-desc">从已发布里随机抽一条，帮你在犹豫的时候更快做决定。</Text>
         </View>
 
         <View className="what-toolbar">
           <View className="what-toolbar-copy">
-            <Text className="what-toolbar-label">可抽取点评</Text>
+            <Text className="what-toolbar-label">可抽取个数</Text>
             <Text className="what-toolbar-value">{totalReviews || '--'}</Text>
           </View>
           <Button className="what-refresh-btn" onClick={() => void drawRandomReview()} loading={refreshing}>

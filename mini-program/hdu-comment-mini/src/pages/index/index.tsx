@@ -78,7 +78,7 @@ export default function Index() {
         <View className="home-header">
           <Text className="home-kicker">What's Little Bread Eating Today?</Text>
           <Text className="home-title">小面包今天吃什么</Text>
-          <Text className="home-subtitle">先看真实反馈，再决定今天吃什么。</Text>
+          <Text className="home-subtitle">是啊今天吃什么呢？</Text>
 
           <View className="home-metrics">
             <View className="metric-card">
@@ -111,10 +111,10 @@ export default function Index() {
           <View className="what-to-eat-copy">
             <Text className="what-to-eat-kicker">Random Pick</Text>
             <Text className="what-to-eat-title">小面包今天吃什么</Text>
-            <Text className="what-to-eat-desc">不知道吃什么的时候，交给小面包随机帮你抽一条真实点评。</Text>
+            <Text className="what-to-eat-desc">不知道吃什么的时候，就交给小面包吧！</Text>
           </View>
           <View className="what-to-eat-action">
-            <Text className="what-to-eat-action-text">去抽签</Text>
+            <Text className="what-to-eat-action-text">去抽卡！</Text>
             <Text className="what-to-eat-arrow">{'>'}</Text>
           </View>
         </View>
