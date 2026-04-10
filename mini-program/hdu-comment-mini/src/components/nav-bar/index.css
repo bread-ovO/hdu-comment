@@ -2,8 +2,8 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
-  box-shadow: 0 8rpx 18rpx rgba(37, 99, 235, 0.18);
+  background: linear-gradient(180deg, #0f766e 0%, #0b5f58 100%);
+  box-shadow: 0 8rpx 18rpx rgba(15, 118, 110, 0.2);
 }
 
 .nav-bar-content {

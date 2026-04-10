@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { useAuthStore } from '../../store/auth';
 import { request } from '../../adapters/request';
 import NavBar from '../../components/nav-bar';
@@ -12,9 +12,18 @@ export default function MyReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  useDidShow(() => {
     if (isLoggedIn) {
       void loadMyReviews();
+      return;
+    }
+
+    setReviews([]);
+  });
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setReviews([]);
     }
   }, [isLoggedIn]);
 

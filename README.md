@@ -42,6 +42,45 @@
 
 开发服务器通过 Vite 代理把 `/api` 请求转发到后端，确保两个服务同时启动即可完成联调。
 
+### 小程序
+1. 进入 `mini-program/hdu-comment-mini` 目录：`cd mini-program/hdu-comment-mini`
+2. 安装依赖：`npm install`
+3. 本地开发模式运行：
+   ```bash
+   npm run dev:weapp
+   ```
+4. 如果需要让真机或开发者工具访问局域网后端，启动时覆盖接口域名：
+   ```bash
+   TARO_APP_API_BASE_URL=http://192.168.1.20:8080/api/v1 \
+   TARO_APP_ASSET_BASE_URL=http://192.168.1.20:8080 \
+   npm run dev:weapp
+   ```
+5. 构建测试包或正式包：
+   ```bash
+   TARO_APP_API_BASE_URL=https://staging-api.example.com/api/v1 \
+   TARO_APP_ASSET_BASE_URL=https://staging-api.example.com \
+   TARO_APP_ENABLE_DEBUG=true \
+   npm run build:weapp:test
+
+   TARO_APP_API_BASE_URL=https://api.example.com/api/v1 \
+   TARO_APP_ASSET_BASE_URL=https://api.example.com \
+   TARO_APP_ENABLE_DEBUG=false \
+   npm run build:weapp:prod
+   ```
+
+小程序配置采用 `config/index.ts + config/dev.ts + config/prod.ts` 三层结构：
+- `config/index.ts`：公共 Taro 配置
+- `config/dev.ts`：开发环境默认值，适合本地或局域网联调
+- `config/prod.ts`：生产构建默认值，可通过环境变量覆盖
+
+小程序常用环境变量：
+- `TARO_APP_API_BASE_URL`：后端 API 地址，例如 `https://api.example.com/api/v1`
+- `TARO_APP_ASSET_BASE_URL`：图片和静态资源访问前缀，例如 `https://cdn.example.com`
+- `TARO_APP_ENV`：环境标识，例如 `development` / `staging` / `production`
+- `TARO_APP_ENABLE_DEBUG`：是否开启调试开关，`true` 或 `false`
+
+> 注意：正式发布到微信小程序时，请使用 HTTPS 域名，并在微信公众平台配置 request / upload / download 合法域名。
+
 ## Docker 部署
 
 项目提供了基于 Docker 的一键启动方案：

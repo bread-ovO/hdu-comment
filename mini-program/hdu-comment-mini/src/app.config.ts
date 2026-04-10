@@ -10,14 +10,14 @@ export default {
   window: {
     backgroundTextStyle: 'light',
     navigationStyle: 'custom',
-    navigationBarBackgroundColor: '#2563eb',
+    navigationBarBackgroundColor: '#0f766e',
     navigationBarTitleText: '杭电美食点评',
     navigationBarTextStyle: 'white',
   },
   tabBar: {
     color: '#64748b',
-    selectedColor: '#2563eb',
-    backgroundColor: '#ffffff',
+    selectedColor: '#0f766e',
+    backgroundColor: '#fffdf8',
     borderStyle: 'black',
     list: [
       {

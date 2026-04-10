@@ -212,7 +212,7 @@
 }
 
 .status-approved {
-  background-color: #dbeafe;
+  background-color: var(--primary-light);
   color: var(--primary-color);
 }
 

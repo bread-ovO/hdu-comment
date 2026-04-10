@@ -95,9 +95,9 @@
 .home-banner {
   margin-top: 20rpx;
   padding: 28rpx;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  background: linear-gradient(135deg, #f4efe2 0%, #dff4f0 100%);
   border-radius: var(--border-radius-xl);
-  border: 1rpx solid #bfdbfe;
+  border: 1rpx solid #cfdccf;
 }
 
 .home-banner-active {

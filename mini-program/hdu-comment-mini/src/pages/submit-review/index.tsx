@@ -60,7 +60,6 @@ export default function SubmitReview() {
     try {
       setLoading(true);
 
-      // 提交点评
       const review = await request<{ id: string }>({
         url: '/reviews',
         method: 'POST',
@@ -72,21 +71,37 @@ export default function SubmitReview() {
         },
       });
 
-      // 上传图片
+      const failedImages: string[] = [];
       for (const imagePath of images) {
-        await uploadReviewImage(review.id, imagePath);
+        try {
+          await uploadReviewImage(review.id, imagePath);
+        } catch (uploadError) {
+          console.error('上传点评图片失败:', uploadError);
+          failedImages.push(imagePath);
+        }
       }
 
-      void Taro.showToast({ title: '发布成功', icon: 'success' });
+      if (failedImages.length > 0) {
+        await Taro.showModal({
+          title: '点评已提交',
+          content: `点评内容已经保存，但有 ${failedImages.length} 张图片上传失败。请到“我的”页面检查后再补传，避免重复提交点评。`,
+          showCancel: false,
+        });
+      } else {
+        void Taro.showToast({ title: '发布成功', icon: 'success' });
+      }
 
-      // 清空表单
       setTitle('');
       setAddress('');
       setDescription('');
       setRating(5);
       setImages([]);
 
-      // 跳转到列表页
+      if (failedImages.length > 0) {
+        void Taro.switchTab({ url: '/pages/my-reviews/index' });
+        return;
+      }
+
       setTimeout(() => {
         void Taro.switchTab({ url: '/pages/index/index' });
       }, 1500);

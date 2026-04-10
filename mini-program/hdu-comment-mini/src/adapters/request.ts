@@ -2,9 +2,9 @@ import Taro from '@tarojs/taro';
 import type { AuthResponse } from '../types';
 import { clearAuth, getRefreshToken, getToken, setRefreshToken, setToken, setUser } from './storage';
 
-// 后端 API 地址 - 开发环境指向本地后端，生产环境需要配置
-const BASE_URL = 'http://localhost:8080/api/v1';
-const BASE_ORIGIN = BASE_URL.replace(/\/api\/v1\/?$/, '');
+const DEFAULT_BASE_URL = 'http://127.0.0.1:8080/api/v1';
+const BASE_URL = (process.env.TARO_APP_API_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, '');
+const BASE_ORIGIN = (process.env.TARO_APP_ASSET_BASE_URL || BASE_URL.replace(/\/api\/v1\/?$/, '')).replace(/\/+$/, '');
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

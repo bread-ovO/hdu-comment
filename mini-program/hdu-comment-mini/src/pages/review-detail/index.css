@@ -127,7 +127,7 @@
 
 .reaction-button-active {
   background: var(--primary-light);
-  border-color: #bfdbfe;
+  border-color: #9fd5cb;
 }
 
 .reaction-button-danger {

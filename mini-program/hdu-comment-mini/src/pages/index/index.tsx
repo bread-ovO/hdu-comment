@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { View, Text, Input } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import { useAuthStore } from '../../store/auth';
 import { request } from '../../adapters/request';
 import NavBar from '../../components/nav-bar';
@@ -13,9 +13,9 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
+  useDidShow(() => {
     void loadReviews();
-  }, []);
+  });
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const filteredReviews = reviews.filter((review) => {

@@ -1,6 +1,8 @@
-import type { UserConfigExport } from '@tarojs/cli';
+import { defineConfig, type UserConfigExport } from '@tarojs/cli';
+import devConfig from './dev';
+import prodConfig from './prod';
 
-export default {
+const baseConfig: UserConfigExport = {
   framework: 'react',
   projectName: 'hdu-comment-mini',
   date: '2026-04-08',
@@ -17,7 +19,6 @@ export default {
     '@tarojs/plugin-platform-weapp',
     '@tarojs/plugin-platform-h5',
   ],
-  defineConstants: {},
   compiler: {
     prebundle: { enable: false },
   },
@@ -29,4 +30,9 @@ export default {
     staticDirectory: 'static',
     webpackChain(chain: any) {},
   },
-} as UserConfigExport;
+};
+
+export default defineConfig(async (merge) => {
+  const envConfig = process.env.NODE_ENV === 'development' ? devConfig : prodConfig;
+  return merge({}, baseConfig, envConfig);
+});
