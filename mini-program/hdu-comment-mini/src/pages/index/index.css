@@ -92,6 +92,62 @@
   color: var(--text-primary);
 }
 
+.what-to-eat-card {
+  margin-top: 20rpx;
+  padding: 30rpx 28rpx;
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.18), transparent 32%),
+    linear-gradient(135deg, #fff7e6 0%, #eefbf7 100%);
+  border-radius: var(--border-radius-xl);
+  border: 1rpx solid #c8ded8;
+  box-shadow: var(--shadow-sm);
+}
+
+.what-to-eat-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.what-to-eat-kicker {
+  font-size: 22rpx;
+  letter-spacing: 4rpx;
+  color: var(--primary-color);
+}
+
+.what-to-eat-title {
+  margin-top: 10rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.what-to-eat-desc {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.what-to-eat-action {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 24rpx;
+  padding: 16rpx 24rpx;
+  border-radius: 999rpx;
+  background: var(--primary-color);
+}
+
+.what-to-eat-action-text,
+.what-to-eat-arrow {
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.what-to-eat-arrow {
+  margin-left: 10rpx;
+}
+
 .home-banner {
   margin-top: 20rpx;
   padding: 28rpx;

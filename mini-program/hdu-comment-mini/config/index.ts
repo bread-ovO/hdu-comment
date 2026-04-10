@@ -4,7 +4,7 @@ import prodConfig from './prod';
 
 const baseConfig: UserConfigExport = {
   framework: 'react',
-  projectName: 'hdu-comment-mini',
+  projectName: 'little-bread-eats-today-mini',
   date: '2026-04-08',
   designWidth: 750,
   deviceRatio: {

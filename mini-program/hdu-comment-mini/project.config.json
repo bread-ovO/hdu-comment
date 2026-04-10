@@ -1,7 +1,7 @@
 {
   "miniprogramRoot": "./dist/",
   "projectname": "hdu-comment-mini",
-  "description": "杭电美食点评平台小程序",
+  "description": "小面包今天吃什么小程序",
   "appid": "touristappid",
   "setting": {
     "urlCheck": false,

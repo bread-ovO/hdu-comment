@@ -55,6 +55,10 @@ export default function Index() {
     void Taro.navigateTo({ url: `/pages/review-detail/index?id=${review.id}` });
   };
 
+  const handleWhatToEat = () => {
+    void Taro.navigateTo({ url: '/pages/what-to-eat/index' });
+  };
+
   const handleLogin = async () => {
     try {
       await loginByWechat();
@@ -69,11 +73,11 @@ export default function Index() {
 
   return (
     <View className="index-page">
-      <NavBar title="杭电美食点评" />
+      <NavBar title="小面包今天吃什么" />
       <View className="index-content">
         <View className="home-header">
-          <Text className="home-kicker">HDU Dining Atlas</Text>
-          <Text className="home-title">杭电美食点评</Text>
+          <Text className="home-kicker">What's Little Bread Eating Today?</Text>
+          <Text className="home-title">小面包今天吃什么</Text>
           <Text className="home-subtitle">先看真实反馈，再决定今天吃什么。</Text>
 
           <View className="home-metrics">
@@ -101,6 +105,18 @@ export default function Index() {
             onInput={(e) => setSearchQuery(e.detail.value)}
             onConfirm={handleSearch}
           />
+        </View>
+
+        <View className="what-to-eat-card" onClick={handleWhatToEat}>
+          <View className="what-to-eat-copy">
+            <Text className="what-to-eat-kicker">Random Pick</Text>
+            <Text className="what-to-eat-title">小面包今天吃什么</Text>
+            <Text className="what-to-eat-desc">不知道吃什么的时候，交给小面包随机帮你抽一条真实点评。</Text>
+          </View>
+          <View className="what-to-eat-action">
+            <Text className="what-to-eat-action-text">去抽签</Text>
+            <Text className="what-to-eat-arrow">{'>'}</Text>
+          </View>
         </View>
 
         {!isLoggedIn ? (

@@ -1,0 +1,207 @@
+.what-page {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+}
+
+.what-content {
+  padding: 24rpx 24rpx 40rpx;
+}
+
+.what-hero,
+.what-toolbar,
+.what-state-card,
+.what-review-card {
+  background: var(--bg-primary);
+  border: 1rpx solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.what-hero {
+  padding: 36rpx 32rpx;
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.16), transparent 30%),
+    linear-gradient(135deg, #fff9ed 0%, #f1fbf8 100%);
+}
+
+.what-kicker {
+  display: block;
+  font-size: 22rpx;
+  letter-spacing: 4rpx;
+  color: var(--primary-color);
+}
+
+.what-title {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 46rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.what-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.what-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20rpx;
+  padding: 24rpx 28rpx;
+}
+
+.what-toolbar-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.what-toolbar-label {
+  font-size: 22rpx;
+  color: var(--text-tertiary);
+}
+
+.what-toolbar-value {
+  margin-top: 8rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.what-refresh-btn {
+  margin: 0;
+  padding: 0 28rpx;
+  height: 74rpx;
+  line-height: 74rpx;
+  border-radius: 999rpx;
+  background: var(--primary-color);
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 700;
+  border: none;
+}
+
+.what-refresh-btn::after {
+  border: none;
+}
+
+.what-state-card {
+  margin-top: 20rpx;
+  padding: 50rpx 32rpx;
+  text-align: center;
+}
+
+.what-state-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.what-state-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.what-review-card {
+  margin-top: 20rpx;
+  padding: 30rpx;
+}
+
+.what-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.what-review-main {
+  flex: 1;
+  margin-right: 16rpx;
+}
+
+.what-review-title {
+  display: block;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.what-review-address {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+}
+
+.what-rating-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--primary-light);
+}
+
+.what-rating-score {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.what-rating-unit {
+  margin-left: 4rpx;
+  font-size: 22rpx;
+  color: var(--primary-color);
+}
+
+.what-review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.what-meta-chip {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: var(--bg-tertiary);
+  font-size: 22rpx;
+  color: var(--text-secondary);
+}
+
+.what-meta-chip + .what-meta-chip {
+  margin-left: 10rpx;
+}
+
+.what-review-desc {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.what-review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid var(--border-color);
+}
+
+.what-review-hint {
+  font-size: 22rpx;
+  color: var(--text-tertiary);
+}
+
+.what-review-arrow {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--primary-color);
+}

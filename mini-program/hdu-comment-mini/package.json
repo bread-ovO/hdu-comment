@@ -1,7 +1,7 @@
 {
   "name": "hdu-comment-mini",
   "version": "1.0.0",
-  "description": "杭电美食点评平台小程序",
+  "description": "小面包今天吃什么小程序",
   "main": "index.js",
   "scripts": {
     "dev:weapp": "NODE_ENV=development taro build --type weapp --watch",

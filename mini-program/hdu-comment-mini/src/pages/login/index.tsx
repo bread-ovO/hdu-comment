@@ -32,8 +32,8 @@ export default function Login() {
       <View className="login-content">
         <View className="login-container">
           <View className="login-header">
-            <Text className="login-kicker">Dining Login</Text>
-            <Text className="app-name">杭电美食点评</Text>
+            <Text className="login-kicker">Little Bread Login</Text>
+            <Text className="app-name">小面包今天吃什么</Text>
             <Text className="app-desc">延续 Web 端的简洁信息卡风格，在小程序里直接登录和查看食堂反馈。</Text>
           </View>
 

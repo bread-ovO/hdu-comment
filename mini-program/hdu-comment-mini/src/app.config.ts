@@ -2,6 +2,7 @@ export default {
   lazyCodeLoading: 'requiredComponents',
   pages: [
     'pages/index/index',
+    'pages/what-to-eat/index',
     'pages/login/index',
     'pages/review-detail/index',
     'pages/submit-review/index',
@@ -11,7 +12,7 @@ export default {
     backgroundTextStyle: 'light',
     navigationStyle: 'custom',
     navigationBarBackgroundColor: '#0f766e',
-    navigationBarTitleText: '杭电美食点评',
+    navigationBarTitleText: '小面包今天吃什么',
     navigationBarTextStyle: 'white',
   },
   tabBar: {
