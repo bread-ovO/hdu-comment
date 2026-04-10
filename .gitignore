@@ -21,6 +21,8 @@ frontend/dist/
 .env
 backend/.env
 frontend/.env
+docker-compose.yml
+docker-compose.override.yml
 
 mini-program/hdu-comment-mini/node_modules/
 mini-program/hdu-comment-mini/dist/

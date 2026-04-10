@@ -86,16 +86,21 @@
 项目提供了基于 Docker 的一键启动方案：
 
 1. 确保已安装 Docker 与 Docker Compose。
-2. 在仓库根目录执行：
+2. 在仓库根目录复制示例配置：
+   ```bash
+   cp docker-compose.example.yml docker-compose.yml
+   ```
+3. 按你的环境修改本地 `docker-compose.yml` 或新增 `docker-compose.override.yml` / `.env`。
+4. 启动服务：
    ```bash
    docker compose build
    docker compose up -d
    ```
-3. 服务启动后：
+5. 服务启动后：
    - 后端 API 暴露在 `http://localhost:8080`
    - 前端页面可通过 `http://localhost:5173` 访问
 
-默认使用 SQLite 存储，数据与上传的图片会持久化到 Compose 定义的卷 `backend-data` 与 `backend-uploads` 中。如需调整后端配置，可在 `docker-compose.yml` 的 `backend.environment` 中覆盖相应的环境变量（例如 `APP_AUTH_JWT_SECRET` 等）。
+默认使用 SQLite 存储，数据与上传的图片会持久化到 Compose 定义的卷 `backend-data` 与 `backend-uploads` 中。仓库中的 [docker-compose.example.yml](/Users/yinchangyu/code/hdu-dp/hdu-comment/docker-compose.example.yml) 仅作为模板，请不要直接在仓库版本里写入生产密钥或服务器私有配置。
 
 停止并清理容器：
 
