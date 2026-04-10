@@ -20,6 +20,7 @@ services:
       APP_STORAGE_PROVIDER: "local"
       APP_STORAGE_UPLOAD_DIR: "/app/uploads"
       APP_STORAGE_PUBLIC_BASE_URL: "/api/v1/uploads"
+
     volumes:
       - backend-data:/app/data
       - backend-uploads:/app/uploads

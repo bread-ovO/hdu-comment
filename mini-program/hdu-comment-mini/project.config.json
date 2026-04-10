@@ -2,7 +2,7 @@
   "miniprogramRoot": "./dist/",
   "projectname": "hdu-comment-mini",
   "description": "小面包今天吃什么小程序",
-  "appid": "touristappid",
+  "appid": "wx95dd2fe935eb6053",
   "setting": {
     "urlCheck": false,
     "es6": true,
