@@ -51,7 +51,7 @@ func (r *UserRepository) FindByQQOpenID(openID string) (*models.User, error) {
 // FindByWeChatOpenID fetches a user by WeChat openid.
 func (r *UserRepository) FindByWeChatOpenID(openID string) (*models.User, error) {
 	var user models.User
-	if err := r.db.Where("wechat_open_id = ?", openID).First(&user).Error; err != nil {
+	if err := r.db.Where("we_chat_open_id = ?", openID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
