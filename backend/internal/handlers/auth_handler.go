@@ -187,6 +187,8 @@ func (h *AuthHandler) WeChatLogin(c *gin.Context) {
 
 	result, err := h.authService.LoginWithWeChat(req.Code)
 	if err != nil {
+		slog.Error("wechat login failed", slog.Any("error", err))
+
 		switch err {
 		case common.ErrWeChatServiceUnavailable:
 			httpx.Error(c, http.StatusServiceUnavailable, "微信登录暂不可用")

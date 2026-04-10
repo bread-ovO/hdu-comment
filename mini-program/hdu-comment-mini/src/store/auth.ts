@@ -75,6 +75,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       // 微信小程序登录
       const loginRes = await Taro.login();
+      console.log('wx login result', loginRes);
+
 
       if (!loginRes.code) {
         throw new Error('微信登录失败');
