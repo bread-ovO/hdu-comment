@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/hdu-dp/backend/internal/httpx"
 	"github.com/hdu-dp/backend/internal/models"
 	"github.com/hdu-dp/backend/internal/services"
@@ -14,12 +15,14 @@ import (
 // ReviewStatsHandler handles review statistics HTTP endpoints
 type ReviewStatsHandler struct {
 	reviewStatsService *services.ReviewStatsService
+	reviewService      *services.ReviewService
 }
 
 // NewReviewStatsHandler creates a new ReviewStatsHandler
-func NewReviewStatsHandler(reviewStatsService *services.ReviewStatsService) *ReviewStatsHandler {
+func NewReviewStatsHandler(reviewStatsService *services.ReviewStatsService, reviewService *services.ReviewService) *ReviewStatsHandler {
 	return &ReviewStatsHandler{
 		reviewStatsService: reviewStatsService,
+		reviewService:      reviewService,
 	}
 }
 
@@ -35,6 +38,9 @@ func NewReviewStatsHandler(reviewStatsService *services.ReviewStatsService) *Rev
 func (h *ReviewStatsHandler) GetReviewStats(c *gin.Context) {
 	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
 	if !ok {
+		return
+	}
+	if !h.ensureApprovedReview(c, reviewID) {
 		return
 	}
 
@@ -59,6 +65,9 @@ func (h *ReviewStatsHandler) GetReviewStats(c *gin.Context) {
 func (h *ReviewStatsHandler) RecordView(c *gin.Context) {
 	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
 	if !ok {
+		return
+	}
+	if !h.ensureApprovedReview(c, reviewID) {
 		return
 	}
 
@@ -86,6 +95,9 @@ func (h *ReviewStatsHandler) RecordView(c *gin.Context) {
 func (h *ReviewStatsHandler) ToggleReaction(c *gin.Context) {
 	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
 	if !ok {
+		return
+	}
+	if !h.ensureApprovedReview(c, reviewID) {
 		return
 	}
 
@@ -128,6 +140,9 @@ func (h *ReviewStatsHandler) ToggleReaction(c *gin.Context) {
 func (h *ReviewStatsHandler) GetUserReaction(c *gin.Context) {
 	reviewID, ok := httpx.ParamUUID(c, "id", "invalid review id")
 	if !ok {
+		return
+	}
+	if !h.ensureApprovedReview(c, reviewID) {
 		return
 	}
 
@@ -181,4 +196,27 @@ func (h *ReviewStatsHandler) GetTotalViews(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"total_views": totalViews})
+}
+
+func (h *ReviewStatsHandler) ensureApprovedReview(c *gin.Context, reviewID uuid.UUID) bool {
+	if h.reviewService == nil {
+		httpx.Error(c, http.StatusInternalServerError, "review service unavailable")
+		return false
+	}
+
+	review, err := h.reviewService.Get(reviewID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			httpx.Error(c, http.StatusNotFound, "review not found")
+			return false
+		}
+		httpx.Error(c, http.StatusInternalServerError, "failed to load review")
+		return false
+	}
+	if review.Status != models.ReviewStatusApproved {
+		httpx.Error(c, http.StatusForbidden, "review not accessible")
+		return false
+	}
+
+	return true
 }

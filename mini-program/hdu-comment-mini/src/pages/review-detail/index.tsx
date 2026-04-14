@@ -43,7 +43,7 @@ export default function ReviewDetail() {
       setReview(reviewDetail);
       setStats(buildFallbackStats(reviewDetail));
 
-      if (recordedReviewID.current !== id) {
+      if (reviewDetail.status === 'approved' && recordedReviewID.current !== id) {
         recordedReviewID.current = id;
         try {
           await request({
@@ -55,9 +55,13 @@ export default function ReviewDetail() {
         }
       }
 
-      await loadStats(id);
-      if (isLoggedIn) {
-        await loadUserReaction(id);
+      if (reviewDetail.status === 'approved') {
+        await loadStats(id);
+        if (isLoggedIn) {
+          await loadUserReaction(id);
+        } else {
+          setUserReaction(null);
+        }
       } else {
         setUserReaction(null);
       }
@@ -189,30 +193,32 @@ export default function ReviewDetail() {
           <Text className="content-text">{review.description}</Text>
         </View>
 
-        <View className="detail-panel">
-          <Text className="panel-title">你的反馈</Text>
-          <Text className="reaction-hint">
-            {isLoggedIn ? '觉得这条点评有帮助？点个赞或踩。再次点击同一项会取消。' : '登录后可以点赞或点踩这条点评。'}
-          </Text>
-          <View className="reaction-row">
-            <View
-              className={`reaction-button reaction-like ${userReaction === 'like' ? 'reaction-button-active' : ''} ${reactionLoading ? 'reaction-button-disabled' : ''}`}
-              onClick={() => void handleReaction('like')}
-            >
-              <Text className={`reaction-icon ${userReaction === 'like' ? 'reaction-icon-active' : ''}`}>赞</Text>
-              <Text className={`reaction-text ${userReaction === 'like' ? 'reaction-text-active' : ''}`}>点赞</Text>
-              <Text className={`reaction-count ${userReaction === 'like' ? 'reaction-text-active' : ''}`}>{stats?.likes ?? 0}</Text>
-            </View>
-            <View
-              className={`reaction-button reaction-dislike ${userReaction === 'dislike' ? 'reaction-button-active reaction-button-danger' : ''} ${reactionLoading ? 'reaction-button-disabled' : ''}`}
-              onClick={() => void handleReaction('dislike')}
-            >
-              <Text className={`reaction-icon ${userReaction === 'dislike' ? 'reaction-icon-danger' : ''}`}>踩</Text>
-              <Text className={`reaction-text ${userReaction === 'dislike' ? 'reaction-text-danger' : ''}`}>点踩</Text>
-              <Text className={`reaction-count ${userReaction === 'dislike' ? 'reaction-text-danger' : ''}`}>{stats?.dislikes ?? 0}</Text>
+        {review.status === 'approved' && (
+          <View className="detail-panel">
+            <Text className="panel-title">你的反馈</Text>
+            <Text className="reaction-hint">
+              {isLoggedIn ? '觉得这条点评有帮助？点个赞或踩。再次点击同一项会取消。' : '登录后可以点赞或点踩这条点评。'}
+            </Text>
+            <View className="reaction-row">
+              <View
+                className={`reaction-button reaction-like ${userReaction === 'like' ? 'reaction-button-active' : ''} ${reactionLoading ? 'reaction-button-disabled' : ''}`}
+                onClick={() => void handleReaction('like')}
+              >
+                <Text className={`reaction-icon ${userReaction === 'like' ? 'reaction-icon-active' : ''}`}>赞</Text>
+                <Text className={`reaction-text ${userReaction === 'like' ? 'reaction-text-active' : ''}`}>点赞</Text>
+                <Text className={`reaction-count ${userReaction === 'like' ? 'reaction-text-active' : ''}`}>{stats?.likes ?? 0}</Text>
+              </View>
+              <View
+                className={`reaction-button reaction-dislike ${userReaction === 'dislike' ? 'reaction-button-active reaction-button-danger' : ''} ${reactionLoading ? 'reaction-button-disabled' : ''}`}
+                onClick={() => void handleReaction('dislike')}
+              >
+                <Text className={`reaction-icon ${userReaction === 'dislike' ? 'reaction-icon-danger' : ''}`}>踩</Text>
+                <Text className={`reaction-text ${userReaction === 'dislike' ? 'reaction-text-danger' : ''}`}>点踩</Text>
+                <Text className={`reaction-count ${userReaction === 'dislike' ? 'reaction-text-danger' : ''}`}>{stats?.dislikes ?? 0}</Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
 
         {review.images && review.images.length > 0 && (
           <View className="detail-panel">
@@ -231,20 +237,22 @@ export default function ReviewDetail() {
           </View>
         )}
 
-        <View className="detail-stats">
-          <View className="stat-item">
-            <Text className="stat-label">浏览</Text>
-            <Text className="stat-value">{stats?.views ?? 0}</Text>
+        {review.status === 'approved' && (
+          <View className="detail-stats">
+            <View className="stat-item">
+              <Text className="stat-label">浏览</Text>
+              <Text className="stat-value">{stats?.views ?? 0}</Text>
+            </View>
+            <View className="stat-item">
+              <Text className="stat-label">点赞</Text>
+              <Text className="stat-value">{stats?.likes ?? 0}</Text>
+            </View>
+            <View className="stat-item">
+              <Text className="stat-label">点踩</Text>
+              <Text className="stat-value">{stats?.dislikes ?? 0}</Text>
+            </View>
           </View>
-          <View className="stat-item">
-            <Text className="stat-label">点赞</Text>
-            <Text className="stat-value">{stats?.likes ?? 0}</Text>
-          </View>
-          <View className="stat-item">
-            <Text className="stat-label">点踩</Text>
-            <Text className="stat-value">{stats?.dislikes ?? 0}</Text>
-          </View>
-        </View>
+        )}
       </View>
     </View>
   );

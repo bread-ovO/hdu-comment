@@ -102,7 +102,7 @@ func New(cfg *config.Config) (*App, error) {
 	authHandler := handlers.NewAuthHandler(authService, emailVerificationService)
 	userHandler := handlers.NewUserHandler(userRepo)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
-	reviewStatsHandler := handlers.NewReviewStatsHandler(reviewStatsService)
+	reviewStatsHandler := handlers.NewReviewStatsHandler(reviewStatsService, reviewService)
 	adminReviewHandler := adminHandlers.NewReviewAdminHandler(reviewService)
 	adminUserHandler := adminHandlers.NewUserAdminHandler(userRepo)
 	emailVerificationHandler := handlers.NewEmailVerificationHandler(emailVerificationService)

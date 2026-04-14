@@ -31,11 +31,13 @@ const ReviewDetail = () => {
 
         let reviewWithStats = data;
 
-        try {
-          const latestStats = await statsApi.getReviewStats(id);
-          reviewWithStats = { ...data, stats: latestStats };
-        } catch (statsError) {
-          console.error('Failed to load review stats:', statsError);
+        if (data.status === 'approved') {
+          try {
+            const latestStats = await statsApi.getReviewStats(id);
+            reviewWithStats = { ...data, stats: latestStats };
+          } catch (statsError) {
+            console.error('Failed to load review stats:', statsError);
+          }
         }
 
         setReview(reviewWithStats);
@@ -90,9 +92,11 @@ const ReviewDetail = () => {
           )}
         </Descriptions>
 
-        <div style={{ marginTop: 16 }}>
-          <ReactionButtons review={review} />
-        </div>
+        {review.status === 'approved' && (
+          <div style={{ marginTop: 16 }}>
+            <ReactionButtons review={review} />
+          </div>
+        )}
 
         {review.images && review.images.length > 0 && (
           <Space wrap>

@@ -120,6 +120,12 @@ func (r *ReviewRepository) DeleteImage(id uuid.UUID) error {
 // Delete removes a review and associated images inside a transaction.
 func (r *ReviewRepository) Delete(id uuid.UUID) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("review_id = ?", id).Delete(&models.ReviewReaction{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("review_id = ?", id).Delete(&models.ReviewStats{}).Error; err != nil {
+			return err
+		}
 		if err := tx.Where("review_id = ?", id).Delete(&models.ReviewImage{}).Error; err != nil {
 			return err
 		}
