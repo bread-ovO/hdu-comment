@@ -53,6 +53,10 @@ func (s *ReviewStatsService) GetUserReaction(ctx context.Context, reviewID, user
 
 // ToggleReaction toggles a user's reaction to a review
 func (s *ReviewStatsService) ToggleReaction(ctx context.Context, reviewID, userID uuid.UUID, reactionType models.ReactionType) error {
+	if _, err := s.reviewStatsRepo.GetByReviewID(ctx, reviewID); err != nil {
+		return err
+	}
+
 	// 获取现有反应
 	existingReaction, err := s.reviewReactionRepo.GetByReviewAndUser(ctx, reviewID, userID)
 

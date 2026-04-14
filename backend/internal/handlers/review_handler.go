@@ -189,6 +189,10 @@ func (h *ReviewHandler) UploadImage(c *gin.Context) {
 		httpx.Error(c, http.StatusForbidden, "not owner")
 		return
 	}
+	if review.Status != models.ReviewStatusPending {
+		httpx.Error(c, http.StatusBadRequest, "images can only be uploaded while review is pending")
+		return
+	}
 
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
